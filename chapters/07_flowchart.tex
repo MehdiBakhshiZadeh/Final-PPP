@@ -1,0 +1,119 @@
+\chapter{Program Flowchart}
+\label{sec:numimpl_flowchart}
+
+The execution structure of the final program is summarized in Figures~\ref{fig:program_flow_setup} and \ref{fig:program_flow_loop}. The first flowchart shows the initialization phase, and the second shows the repeated simulation loop.
+
+\begin{figure}[htbp]
+\centering
+\footnotesize
+\begin{tikzpicture}[
+    node distance=5.5mm,
+    >=Latex,
+    line width=0.6pt,
+    every node/.style={font=\footnotesize},
+    box/.style={
+        rectangle,
+        rounded corners=2pt,
+        draw=orange!35!black,
+        fill=orange!10,
+        align=center,
+        text width=5.4cm,
+        minimum height=8mm,
+        inner sep=3pt
+    },
+    io/.style={
+        trapezium,
+        trapezium left angle=75,
+        trapezium right angle=105,
+        draw=orange!35!black,
+        fill=orange!10,
+        align=center,
+        text width=5.4cm,
+        minimum height=8mm,
+        inner sep=3pt
+    },
+    flow/.style={->, draw=black}
+]
+
+\node[io] (entry) {Entry point\\ \texttt{run\_model\_class.m} or \texttt{run\_gui.m}};
+\node[box, below=of entry] (params) {Load default parameters\\ and user modifications};
+\node[box, below=of params] (finalize) {\texttt{finalizeParams.m}\\ validate and normalize settings};
+\node[box, below=of finalize] (grid) {\texttt{buildGrid.m}\\ create grid and mesh data};
+\node[box, below=of grid] (op) {\texttt{makeOperator.m}\\ construct diffusion backend\\ (\texttt{matrix}, \texttt{full}, or \texttt{stencil})};
+\node[box, below=of op] (model) {\texttt{GrayScottModel.m}\\ initialize state, set RNG seed,\\ and prepare boundary cache if needed};
+
+\draw[flow] (entry) -- (params);
+\draw[flow] (params) -- (finalize);
+\draw[flow] (finalize) -- (grid);
+\draw[flow] (grid) -- (op);
+\draw[flow] (op) -- (model);
+
+\end{tikzpicture}
+\caption{Initialization and setup phase of the final Gray--Scott solver.}
+\label{fig:program_flow_setup}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\footnotesize
+\begin{tikzpicture}[
+    node distance=6mm,
+    >=Latex,
+    line width=0.6pt,
+    every node/.style={font=\footnotesize},
+    box/.style={
+        rectangle,
+        rounded corners=2pt,
+        draw=orange!35!black,
+        fill=orange!10,
+        align=center,
+        text width=5.4cm,
+        minimum height=8mm,
+        inner sep=3pt
+    },
+    decision/.style={
+        diamond,
+        draw=orange!35!black,
+        fill=orange!10,
+        align=center,
+        aspect=2.1,
+        text width=3.3cm,
+        inner sep=1.5pt
+    },
+    io/.style={
+        trapezium,
+        trapezium left angle=75,
+        trapezium right angle=105,
+        draw=orange!35!black,
+        fill=orange!10,
+        align=center,
+        text width=5.4cm,
+        minimum height=8mm,
+        inner sep=3pt
+    },
+    flow/.style={->, draw=black},
+    yn/.style={font=\scriptsize, text=violet!70!black}
+]
+
+\node[decision] (stopq) {Final time\\ or stop\\ reached?};
+\node[box, below=8mm of stopq] (step) {\texttt{eulerStep.m}\\ diffusion + reaction + optional source\\ + Euler update + boundary enforcement};
+\node[box, below=of step] (update) {Update model state,\\ time, step counter, and diagnostics};
+\node[decision, below=8mm of update] (outputq) {Plot or export\\ at this step?};
+\node[box, below=8mm of outputq] (output) {Optional output:\\ \texttt{plotState.m} or \texttt{exportFrame.m}};
+\node[io, below=8mm of output] (save) {Save final state, metadata,\\ and log information};
+\node[io, below=of save] (end) {End};
+
+\draw[flow] (stopq) -- node[right, yn] {no} (step);
+\draw[flow] (step) -- (update);
+\draw[flow] (update) -- (outputq);
+\draw[flow] (outputq) -- node[right, yn] {yes} (output);
+
+\draw[flow] (output.west) -- ++(-1.7,0) |- ([xshift=-7mm]stopq.west) -- (stopq.west);
+\draw[flow] (outputq.east) -- ++(1.2,0) node[midway, above, yn] {no} |- (save.east);
+\draw[flow] (stopq.east) -- ++(1.2,0) node[midway, above, yn] {yes} |- (save.east);
+\draw[flow] (save) -- (end);
+
+\end{tikzpicture}
+\caption{Repeated simulation loop of the final Gray--Scott solver.}
+\label{fig:program_flow_loop}
+\end{figure}

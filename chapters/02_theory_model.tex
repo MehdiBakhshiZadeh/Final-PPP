@@ -1,0 +1,60 @@
+\chapter{Theory and Mathematical Model}
+
+\section{Gray--Scott Reaction--Diffusion System}
+
+Reaction--diffusion systems describe processes in which chemical species both react locally and spread in space by diffusion. Even relatively simple nonlinear interactions can generate complex spatial structures such as spots, stripes, travelling fronts, and labyrinth-like patterns. For this reason, reaction--diffusion equations are widely used as model systems for studying self-organization and pattern formation in chemistry, physics, and biology \citep{gandy2022,pearson1993}.
+
+The Gray--Scott model is a particularly well-known two-species reaction--diffusion system. It is based on an autocatalytic chemical mechanism in an open environment, where one component is continuously supplied and another is removed or decays. This continuous feeding and removal keep the system away from thermodynamic equilibrium and allow the formation of sustained non-uniform spatial patterns instead of simple relaxation to a homogeneous steady state \citep{gray1984,gandy2022,pearson1993}.
+
+In its standard form, the model uses two scalar concentration fields, denoted here by $u(\mathbf{x},t)$ and $v(\mathbf{x},t)$. Their dynamics are governed by the interaction of local nonlinear reaction kinetics and spatial diffusion. The central mechanism is cubic autocatalysis, meaning that the presence of one species promotes further production of itself through reaction with the other species. At the same time, diffusion tends to smooth spatial gradients. The patterns observed in the Gray--Scott system therefore arise from the competition between local nonlinear amplification and spatial spreading.
+
+The Gray--Scott model is especially suitable for the present project because it combines a compact mathematical structure with rich qualitative behaviour. Small changes in the model parameters can lead to significantly different dynamical regimes, which makes the system an effective benchmark for the study of pattern-forming partial differential equations and their numerical simulation \citep{gandy2022,pearson1993}.
+
+\section{Interpretation of the Model Terms}
+
+In the present work, the Gray--Scott model is written in the standard dimensionless form
+\begin{align}
+\frac{\partial u}{\partial t} &= D_u \nabla^2 u - u v^2 + F(1-u), \\
+\frac{\partial v}{\partial t} &= D_v \nabla^2 v + u v^2 - (F+k)v ,
+\end{align}
+where $u(\mathbf{x},t)$ and $v(\mathbf{x},t)$ denote the concentrations of the two interacting species, $D_u$ and $D_v$ are their diffusion coefficients, $F$ is the feed rate, and $k$ is the removal or decay rate of the second species \citep{gandy2022,pearson1993}.
+
+The diffusion terms, $D_u \nabla^2 u$ and $D_v \nabla^2 v$, describe spatial spreading from regions of higher concentration toward regions of lower concentration. If diffusion acted alone, both fields would tend to become spatially uniform. Pattern formation is therefore not caused by diffusion alone, but by its interaction with the nonlinear reaction kinetics.
+
+The reaction term $u v^2$ represents the autocatalytic part of the dynamics. It consumes the species $u$ and simultaneously produces the species $v$. This nonlinear coupling is the main local amplification mechanism in the model. Because the production rate depends quadratically on $v$, already existing amounts of $v$ can enhance further growth of $v$, provided that enough $u$ is available. This feedback is one of the main reasons why localized structures and self-replicating patterns can emerge.
+
+The feed term $F(1-u)$ continuously drives the field $u$ toward the reference value $u=1$. Physically, this represents the external supply of one reactant from the surrounding environment. Without such forcing, the system would behave like a closed reaction system and would not sustain the same long-time pattern-forming behaviour. The term $(F+k)v$ in the second equation describes the loss of $v$ through both outflow and decay. Together, the feed and removal terms make the model an open nonequilibrium system.
+
+The qualitative behaviour of the Gray--Scott model is controlled mainly by the balance between diffusion, nonlinear autocatalytic reaction, feeding, and removal. In particular, the parameters $F$ and $k$ strongly influence whether the solution approaches a nearly homogeneous state or develops persistent heterogeneous patterns. For this reason, these parameters play a central role in the analysis of the model and in the numerical experiments carried out in this project \citep{gandy2022,pearson1993}.
+
+\section{Domain, Initial Conditions, and Boundary Conditions}
+
+In this work, the Gray--Scott system is considered on a two-dimensional rectangular spatial domain
+\[
+\Omega = [0,L_x) \times [0,L_y),
+\]
+with concentration fields $u(\mathbf{x},t)$ and $v(\mathbf{x},t)$ defined over $\Omega$. This setting is sufficiently simple to keep the model mathematically transparent, while still being rich enough to exhibit the characteristic spatial structures of the Gray--Scott dynamics \citep{gandy2022,pearson1993}.
+
+The initial state is chosen as a nearly homogeneous background together with a localized perturbation in the centre of the domain. In qualitative terms, the field $u$ is initially close to its feed-dominated reference state, whereas $v$ is initially close to zero except in a small central region where both concentrations are perturbed. Such a configuration is standard for Gray--Scott simulations because it provides a localized seed from which the subsequent pattern can develop. Small random perturbations are additionally useful for breaking exact symmetry and allowing the intrinsic dynamics of the system to select a spatial structure \citep{pearson1993,gandy2022}.
+
+For the main Gray--Scott study in this project, periodic boundary conditions are used as the default choice and are also used in the core tests. From a modelling perspective, periodic boundaries are natural for pattern-formation studies because they reduce artificial edge effects and allow the dynamics to be interpreted as evolution on a repeating domain. In this way, the observed structures are governed primarily by the competition between reaction and diffusion rather than by strong boundary constraints \citep{pearson1993,gandy2022}.
+
+For completeness, the implementation is not restricted to periodic boundaries only. It also supports Dirichlet and Neumann boundary conditions on each side of the domain. However, these alternatives are not the central focus of the present theory chapter. The main theoretical emphasis remains on the standard periodic Gray--Scott setting, since this is the reference configuration for the principal simulations and comparisons in the project.
+
+\section{Model Parameters Relevant to This Work}
+
+The central model parameters of the Gray--Scott system are the diffusion coefficients $D_u$ and $D_v$ together with the feed and removal parameters $F$ and $k$. Among these, $D_u$ and $D_v$ control the relative spatial spreading of the two species, while $F$ and $k$ primarily determine the local reaction balance and therefore have a particularly strong influence on the qualitative behaviour of the solution. In practice, different combinations of these parameters can lead to markedly different dynamical regimes, ranging from almost homogeneous states to persistent heterogeneous patterns \citep{gandy2022,pearson1993}.
+
+In the present project, the diffusion coefficients are taken as
+\[
+D_u = 2 \times 10^{-5}, \qquad D_v = 1 \times 10^{-5},
+\]
+which means that the species $u$ diffuses twice as fast as $v$. A representative default parameter choice used in the project is
+\[
+F = 0.03, \qquad k = 0.06.
+\]
+These values provide a convenient reference configuration for simulation and comparison, while remaining within the standard Gray--Scott setting considered in the literature.
+
+At the same time, the project is not limited to a single fixed pair of $(F,k)$ values. Instead, the Gray--Scott model is treated here as a parameter-dependent system whose behaviour can be explored over a broader range of feed and removal rates. This viewpoint is important because the main scientific interest lies not only in one isolated simulation, but in understanding how changes in the governing parameters affect the resulting patterns and long-time dynamics \citep{gandy2022,pearson1993}.
+
+Besides $D_u$, $D_v$, $F$, and $k$, the overall model setup also depends on the spatial domain size and on the form and strength of the initial perturbation. These quantities influence how patterns are triggered and how much spatial room is available for their development. However, from the theoretical perspective of the Gray--Scott system, the dominant control parameters remain $F$ and $k$, since they most directly organize the transition between different qualitative regimes. For this reason, they play the most prominent role in the interpretation of the results presented later in this report.

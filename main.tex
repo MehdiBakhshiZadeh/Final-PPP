@@ -1,0 +1,81 @@
+\documentclass[title-black]{tubaf-report}
+\usepackage[sans]{tubaf-fonts}
+\usepackage[english]{babel}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{tikz}
+\usepackage{float}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric}
+
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+
+\setcounter{tocdepth}{2}
+\setcounter{secnumdepth}{3}
+
+\newcommand{\refnote}[1]{\textbf{[REF: #1]}}
+
+\begin{document}
+
+\title{Implementation of a Simulation Tool for the Gray--Scott Model}
+\subtitle{Final Report for the Personal Project Programming Module}
+\author{Mehdi Bakhshi Zadeh}
+\date{5 April 2026}
+\subject{PPP Final Report}
+\publishers{%
+TU Bergakademie Freiberg\\
+Personal Project Programming\\[0.5em]
+Supervisor: PD Dr.\ rer.\ nat.\ habil.\ Uwe Pr\"ufert
+}
+
+\maketitle
+
+\pagenumbering{roman}
+
+\tableofcontents
+\clearpage
+
+\listoffigures
+\clearpage
+
+\listoftables
+\clearpage
+
+\begin{abstract}
+\input{chapters/00_abstract}
+\end{abstract}
+\clearpage
+
+\pagenumbering{arabic}
+
+\input{chapters/01_introduction}
+\input{chapters/02_theory_model}
+\input{chapters/03_existing_code_originality}
+\input{chapters/04_numerical_methods_implementation}
+\input{chapters/05_code_used_external_software}
+\input{chapters/06_tools_ai_usage}
+\input{chapters/07_flowchart}
+\input{chapters/08_verification}
+\input{chapters/09_computation_time}
+\input{chapters/10_benchmark}
+\input{chapters/11_compliance_limitations_future}
+\input{chapters/12_conclusion}
+
+\bibliographystyle{unsrtnat}
+\bibliography{BibTex}
+
+\appendix
+\input{appendices/A_git_log}
+\input{appendices/B_software_inventory}
+\input{appendices/C_extra_material}
+\input{appendices/08_manual}
+
+\end{document}

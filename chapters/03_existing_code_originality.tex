@@ -1,0 +1,64 @@
+\chapter{Existing Code Resources and Project Originality}
+
+\section{Closest Existing Code and Resources in the WWW}
+
+A focused research scan was carried out for publicly available repositories that directly implement the Gray--Scott reaction--diffusion model on a two-dimensional grid. Since this chapter is restricted to direct Gray--Scott repositories, general PDE frameworks and purely visual WebGL demonstrations are not discussed here. The closest resources found in the scan are compact MATLAB demonstration codes, educational multi-language implementations, and notebook-based Python projects rather than complete MATLAB simulation frameworks.
+
+The closest MATLAB resource found is the repository by Sbalbi, which provides a MATLAB function for generating and recording Gray--Scott patterns. It allows the user to choose the feed and kill parameters and also exposes practical options such as grid size, initial state, colormap, and output file settings \cite{sbalbi_gray_scott}. This makes it a useful and relevant reference for basic MATLAB-based Gray--Scott simulation and visualization. However, it is essentially a compact generator script rather than a larger project structure with multiple solver backends, automated testing, or systematic benchmarking.
+
+Another close reference is the Gray--Scott material by Burkardt. His \texttt{gray\_scott\_pde} page provides a direct Gray--Scott solver and explicitly states that versions are available in MATLAB, Octave, and Python \cite{burkardt_gray_scott_pde}. In addition, the related \texttt{gray\_scott\_movie} code focuses on generating graphics frames and assembling them into a movie \cite{burkardt_gray_scott_movie}. These resources are especially relevant because they are direct, educational, and accessible implementations of the same model equation, but they are still organized as stand-alone numerical examples rather than as an integrated application with GUI control, verification scripts, and solver-comparison infrastructure.
+
+The notebook-based project \texttt{Gray-Scott-PDE} by SABS-R3 is another close resource \cite{sabs_gray_scott}. Its repository contains a Python package structure, a \texttt{tests} directory, and a main Jupyter notebook, and its README states that the time derivative is approximated by a forward difference while the Laplacian is approximated by a central difference scheme \cite{sabs_gray_scott}. This makes it closer to a small teaching project than to a one-file demonstration. Even so, its workflow remains primarily notebook-driven and Python-based, whereas the present work develops a dedicated MATLAB implementation whose emphasis is not only on producing patterns, but also on comparing solver realizations and documenting their behavior in a controlled benchmark setting.
+
+Table~\ref{tab:closest_gray_scott_resources} summarizes the closest direct Gray--Scott repositories identified in the research scan. The comparison shows that Gray--Scott implementations are widely available in the WWW, but they typically emphasize only one aspect at a time: a short MATLAB generator, an educational stand-alone solver, or a notebook-based Python project. In contrast, the present PPP combines numerical implementation, interface-level usability, verification, and benchmarking within a single MATLAB project. This does not make the Gray--Scott model itself original, but it does clearly define the practical gap in available public resources that this project addresses.
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{2.2cm}|>{\raggedright\arraybackslash}p{2.0cm}|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|}
+\hline
+\textbf{Resource} & \textbf{Language(s)} & \textbf{Main focus} & \textbf{Main limitation relative to this PPP} \\
+\hline
+Sbalbi \cite{sbalbi_gray_scott}
+& MATLAB
+& Compact Gray--Scott generator with recording and export options
+& Small demonstration code; no solver comparison, no automated tests, no project-scale structure \\
+\hline
+Burkardt \cite{burkardt_gray_scott_pde,burkardt_gray_scott_movie}
+& MATLAB, Octave, Python
+& Educational Gray--Scott solver and movie examples
+& Separate stand-alone examples rather than one integrated MATLAB application with GUI and benchmarking \\
+\hline
+SABS-R3 \cite{sabs_gray_scott}
+& Python, Jupyter Notebook
+& Notebook-based teaching project with package structure and tests
+& Python-centered workflow; no MATLAB GUI and no solver-benchmark emphasis \\
+\hline
+\end{tabularx}
+\caption{Closest direct Gray--Scott repositories identified in the WWW research scan.}
+\label{tab:closest_gray_scott_resources}
+\end{table}
+
+\section{What This Project Implements Independently}
+
+The independent contribution of the present PPP is not the Gray--Scott model itself, since that model and many basic implementations already exist in the literature and in publicly available repositories. The contribution of this work is instead the development of a complete MATLAB project around the model, with emphasis on implementation quality, solver comparison, verification, and usability.
+
+In contrast to short demonstration scripts, the present project is organized as a coherent codebase rather than as a single stand-alone file. The numerical model, parameter handling, simulation control, visualization workflow, and user interaction are connected through one consistent project structure. This makes the code suitable not only for producing Gray--Scott patterns, but also for studying how different implementation choices affect the behavior and efficiency of the simulation.
+
+A central element implemented independently in this project is the use of more than one diffusion realization within the same MATLAB framework. In particular, the project supports different solver backends for the diffusion part, so that they can be compared under the same model equations, parameter sets, and output conditions. This solver-comparison perspective is important for the PPP because benchmarking and implementation choice are among the main technical goals of the work, whereas the closest public repositories usually provide only one numerical realization and focus mainly on obtaining visual pattern formation.
+
+Another independently implemented part is the integration of a graphical user interface with the simulation engine. The GUI is not a separate visual toy, but a front end connected to the same underlying model logic. This allows interactive exploration of presets and simulation settings while preserving a common numerical core. In addition, the project includes automated tests and dedicated benchmark scripts. As a result, the code is not only executable, but also testable and comparable in a systematic way.
+
+For these reasons, the present PPP should be understood as an independently developed MATLAB simulation environment for the Gray--Scott system. Its originality lies in the structured implementation, the integration of solver variants, the connection between model and GUI, and the explicit verification and benchmarking workflow, rather than in claiming novelty for the underlying reaction--diffusion equations themselves.
+
+\section{Original, Adapted, and Adopted Parts}
+
+The present PPP does not claim originality for the Gray--Scott model itself, for the general idea of finite-difference discretization, or for the use of standard benchmark parameter sets from the literature. These elements belong to the established scientific and numerical background of the problem. Their role in this work is therefore adopted at the model and method level, not invented within the project.
+
+At the code level, however, the implementation of the present PPP was developed independently. No external Gray--Scott repository was copied, and no source code fragment was directly adopted into the final MATLAB project. The publicly available resources discussed in the previous section were used only as part of the required research scan and as contextual references for comparison. Accordingly, the structure of the final codebase, the organization of the MATLAB files, the integration of the GUI with the numerical engine, the use of alternative solver backends within one framework, and the benchmark workflow are the result of the present project's own implementation work.
+
+It is nevertheless important to distinguish independent implementation from complete conceptual isolation. The project naturally follows standard ideas that are common in numerical simulation software, such as separating model logic from visualization, using parameter presets, and checking numerical behavior by automated tests and benchmark scripts. In this sense, the work is methodologically informed by common scientific-computing practice, but it is not based on direct code reuse from the repositories identified in the WWW scan.
+
+Therefore, the honest classification of the present PPP is as follows: the physical model and basic numerical principles are adopted from established literature, the overall software-engineering approach is independently implemented, and no direct source-code adaptation from the compared external Gray--Scott repositories is present in the final project. This distinction is important because it shows both academic honesty and the actual programming contribution of the work.
