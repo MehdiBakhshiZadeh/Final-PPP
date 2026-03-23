@@ -1,2 +1,72 @@
 \chapter{Computation Time Study}
-TEXT PLACE HOLDER
+
+This chapter reports an internal timing study of the final program using MATLAB's built-in \texttt{tic}/\texttt{toc} functions. The measurements were obtained for the stencil-based solver on a \(256\times256\) grid with 20 warm-up steps and 500 timed steps. Two cases were considered: a run without live plotting to isolate the numerical workload, and a run with live plotting every ten steps to assess visualization overhead.
+
+\section{Function-Level Timing Results}
+
+Table~\ref{tab:ch9_run_summary} gives the total runtime of the two representative runs. The version without plotting reflects the computational cost of the numerical core, while the version with plotting shows the additional overhead caused by live visualization.
+
+\begin{table}[H]
+    \centering
+    \caption{Overall runtime summary for the internal computation-time study.}
+    \label{tab:ch9_run_summary}
+    \begin{tabular}{lrrr}
+        \toprule
+        Case & Setup time [s] & Timed-loop time [s] & Total wall time [s] \\
+        \midrule
+        No plotting   & 0.037584 & 0.892993 & 0.930577 \\
+        With plotting & 0.037351 & 8.385918 & 8.392077 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+The top-level distribution of runtime over the main program stages is shown in Table~\ref{tab:ch9_function_timing}. In the no-plot case, \texttt{eulerStep} dominates the execution. In the interactive case, plotting becomes the dominant stage.
+
+\begin{table}[H]
+    \centering
+    \caption{Top-level function and stage timings for the internal computation-time study.}
+    \label{tab:ch9_function_timing}
+    \begin{tabular}{lrrrr}
+        \toprule
+        \multirow{2}{*}{Stage / Function} & \multicolumn{2}{c}{No plotting} & \multicolumn{2}{c}{With plotting} \\
+        \cmidrule(lr){2-3}\cmidrule(lr){4-5}
+         & Time [s] & Share [\%] & Time [s] & Share [\%] \\
+        \midrule
+        eulerStep        & 0.889539 & 95.59 & 1.441456 & 17.18 \\
+        plotting         & 0.000000 & 0.00  & 6.937712 & 82.67 \\
+        initialCondition & 0.024986 & 2.69  & 0.003907 & 0.05 \\
+        makeOperator     & 0.003871 & 0.42  & 0.000321 & 0.00 \\
+        otherOverhead    & 0.003454 & 0.37  & 0.006749 & 0.08 \\
+        buildGrid        & 0.002949 & 0.32  & 0.000211 & 0.00 \\
+        finalizeParams   & 0.002364 & 0.25  & 0.000528 & 0.01 \\
+        defaultParams    & 0.002224 & 0.24  & 0.000594 & 0.01 \\
+        buildBCcache     & 0.001191 & 0.13  & 0.000599 & 0.01 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Since \texttt{eulerStep} is the dominant numerical stage, its internal composition was also inspected. Table~\ref{tab:ch9_eulerstep_breakdown} shows that \texttt{applyDiffusion} is the largest subcomponent inside \texttt{eulerStep} in both runs.
+
+\begin{table}[H]
+    \centering
+    \caption{Internal timing breakdown of \texttt{eulerStep}.}
+    \label{tab:ch9_eulerstep_breakdown}
+    \begin{tabular}{lrrrr}
+        \toprule
+        \multirow{2}{*}{Subcomponent} & \multicolumn{2}{c}{No plotting} & \multicolumn{2}{c}{With plotting} \\
+        \cmidrule(lr){2-3}\cmidrule(lr){4-5}
+         & Time [s] & Share [\%] & Time [s] & Share [\%] \\
+        \midrule
+        applyDiffusion          & 0.326522 & 36.71 & 0.588390 & 40.82 \\
+        applyBoundaryConditions & 0.207558 & 23.33 & 0.285682 & 19.82 \\
+        diagnostics             & 0.192944 & 21.69 & 0.255376 & 17.72 \\
+        explicitEulerUpdate     & 0.066433 & 7.47  & 0.141630 & 9.82 \\
+        reactionGrayScott       & 0.063492 & 7.14  & 0.088191 & 6.12 \\
+        sourceTerm              & 0.003742 & 0.42  & 0.006406 & 0.44 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\section{Identification of the Computational Bottleneck}
+
+The internal timing results lead to a clear bottleneck statement. For the numerical core, the dominant repeated-cost function is \texttt{eulerStep}, and the largest internal contributor within it is \texttt{applyDiffusion}. When live visualization is enabled, plotting becomes the dominant program-level cost. Thus, the main computational bottleneck of the solver itself is the repeated time-stepping routine, whereas the main practical bottleneck in interactive execution is rendering.
