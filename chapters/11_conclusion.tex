@@ -1,13 +1,11 @@
 \chapter{Conclusion}
 
-\section{Summary of Technical Achievements}
+This PPP developed a MATLAB simulation tool for the Gray--Scott reaction--diffusion model together with a structured workflow for testing, benchmarking, and interactive use through a graphical user interface. The final program includes multiple diffusion implementations, configurable boundary conditions, reproducible test cases, and plotting/export functionality, while the GUI and non-GUI workflows share the same numerical core.
 
-TEXT PLACEHOLDER.
+The verification results showed that the implementation solves the intended problem correctly. The manufactured-solution test confirmed the expected second-order spatial accuracy of the discrete Laplacian, and the time-step study showed the expected first-order behavior of the explicit Euler scheme. Further tests verified correct boundary-condition treatment, machine-precision agreement between the matrix-based and stencil-based diffusion realizations, and consistency between GUI and non-GUI execution for the documented reference case. A Pearson-type pattern sanity check further supported the physical plausibility of the results.
 
-\section{Main Numerical and Software Findings}
+The main practical question of this project was which solver should be used in the final program. The benchmark study showed that the dense formulation is useful only as a small-scale reference. The sparse-matrix and stencil-based solvers were both competitive in runtime, but the memory results were more decisive: over the relevant grid range, the stencil implementation required less memory and showed better scaling behavior. For this reason, the stencil solver was selected as the default solver of the final program, since it provides the best overall compromise between efficiency and scalability.
 
-TEXT PLACEHOLDER.
+The study also showed that repeated time stepping is the dominant numerical cost, while plotting becomes the main overhead in interactive runs. Some limitations remain: the final implementation still uses explicit Euler time integration, so the admissible time step is restricted by stability, and the benchmark was limited to the solver variants and grid sizes considered here. Possible extensions beyond the scope of this PPP include implicit or semi-implicit time stepping, parallelization for HPC or GPU-based computing, and hybrid optimization strategies for the diffusion step. Additional large-scale benchmarks and validation against further literature results would also be useful.
 
-\section{Final Takeaway}
-
-TEXT PLACEHOLDER.
+Overall, the project achieved its practical goal: it produced a verified and benchmarked Gray--Scott simulation program in which the stencil-based solver emerged as the most suitable default choice for the final implementation.
