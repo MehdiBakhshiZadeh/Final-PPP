@@ -547,4 +547,79 @@ From a software-engineering perspective, the final implementation combines modul
 
 In summary, the MATLAB implementation is organized around a clear division of responsibilities: parameter definition and normalization, grid construction, operator setup, model-state management, one-step evolution, output handling, and testing are all separated into dedicated components. On top of this modular architecture, the final code introduces several practical optimizations, including preconstructed operators, reproducible initialization, boundary caching, persistent plotting objects, persistent export figures, and structured output logging. These implementation choices complement the numerical method and help turn the solver into a consistent and reliable computational tool.
 
+\section{Graphical User Interface (GUI)}
+\label{sec:gui}
 
+\subsection{GUI Design Evolution and Final Concept}
+\label{subsec:gui_evolution}
+
+The graphical user interface (GUI) of the final program was not fixed from the beginning, but was developed through a small design evolution. The main goal of the GUI was to provide a simple and practical interface for controlling the Gray--Scott simulation without changing the underlying numerical core. During the design process, different window layouts were considered in order to find a solution that was both user-friendly and technically robust in MATLAB.
+
+Although the GUI is not the numerical core of the project, its implementation was not a trivial add-on. Even for a medium-sized scientific application, GUI development requires the coordination of many interactive elements such as parameter controls, boundary-condition selection, plotting, simulation-state handling, and recording options. For this reason, the GUI design had to be refined step by step instead of being treated as a purely cosmetic wrapper around the solver.
+
+The first concept was an all-in-one interface in which the simulation controls and the graphical visualization were planned to appear in a single window. This idea was attractive because it grouped all user interactions and outputs in one place. Figure~\ref{fig:gui_mockup_allinone} shows this early mockup. However, during implementation this approach became less suitable, mainly because plotting inside an embedded axis object caused practical difficulties. In addition, combining all controls and visualization elements in one window made the interface more crowded and harder to manage.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{figures/mockup-all-in-one.png}
+    \caption{Early all-in-one GUI mockup combining controls and simulation visualization in a single window.}
+    \label{fig:gui_mockup_allinone}
+\end{figure}
+
+For this reason, the design was revised toward a two-window concept. In this second approach, one window was dedicated to simulation control and parameter adjustment, while a separate window was used for visualization of the computed field. An early mockup of this direction is shown in Figure~\ref{fig:gui_mockup_twowindows}. This change reduced clutter, improved usability, and made the MATLAB implementation more manageable.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{figures/mockup-two-windows.png}
+    \caption{Revised GUI mockup with separated controller and visualization windows.}
+    \label{fig:gui_mockup_twowindows}
+\end{figure}
+
+The final GUI follows this separated architecture. A controller window is used for parameter input and simulation commands, while a separate plot window displays the selected solution field. This final concept provides a clearer workflow for the user and avoids the technical limitations encountered in the earlier all-in-one design. At the same time, it preserves the main purpose of the GUI as a convenient front end to the same simulation engine that is also used by the non-GUI workflow.
+
+\subsection{Final GUI Structure and Main Features}
+\label{subsec:gui_structure}
+
+The final GUI is organized as two cooperating windows: a controller window for user interaction and a separate plot window for graphical output. This separation was chosen deliberately in order to keep the interface clear and to avoid overloading a single window with too many responsibilities. The controller is responsible for receiving user input and managing the simulation state, whereas the plot window is dedicated to visualizing the computed solution field.
+
+The controller window is shown in Figure~\ref{fig:gui_final_controller}. It combines the most important simulation controls in one place. The interface includes parameter sliders for the feed and kill rates, editable diffusion coefficients, boundary-condition selection, and the main execution buttons for running, pausing, restarting, resetting, and recording the simulation. In addition, the user can choose which field is displayed, select a video format for export, define the recording frame rate, and monitor the current simulation state through the status display. The equations are also shown directly in the interface so that the GUI remains closely connected to the underlying mathematical model.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{figures/final-desing-controller.png}
+    \caption{Final controller window of the Gray--Scott GUI.}
+    \label{fig:gui_final_controller}
+\end{figure}
+
+The visualization itself is handled in a separate plot window, shown in Figure~\ref{fig:gui_final_plotter}. This window focuses on displaying the selected simulation field in a clean and readable form. By separating plotting from parameter control, the graphical output remains less cluttered and easier to inspect during interactive runs. This also improves the practical usability of the program, since the user can focus on simulation control in one window and on pattern development in another.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.88\textwidth]{figures/final-design-plotter.png}
+    \caption{Separate plot window used for visualization of the selected solution field.}
+    \label{fig:gui_final_plotter}
+\end{figure}
+
+Even at a high level, the GUI is more than a simple collection of buttons and sliders. Different user actions must trigger different updates in a coordinated way. Menu actions, parameter changes, plotting options, execution commands, boundary-condition selection, and recording settings all need to interact consistently with the current model state. The overall interaction logic is illustrated by the information-flow diagram in Figure~\ref{fig:gui_information_flow}. This figure emphasizes that building a GUI for a scientific simulation involves structured communication between many interface elements rather than only arranging visual components on the screen.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{figures/InformationFlowGUI.png}
+    \caption{High-level information flow between major GUI elements and user actions.}
+    \label{fig:gui_information_flow}
+\end{figure}
+
+In this way, the final GUI provides an interface that is practical for interactive use while remaining closely connected to the numerical model. The chosen architecture makes the application easier to use, easier to maintain, and better suited to the workflow of repeated simulation, visualization, and optional recording.
+
+\subsection{Integration with the Simulation Core}
+\label{subsec:gui_integration}
+
+The GUI was designed as a front end to the same simulation core that is also used outside the graphical environment. In other words, the GUI does not implement a separate numerical model of its own. Instead, it provides a structured way for the user to define parameters, start or stop computations, select visualization options, and trigger output actions while relying on the existing solver and model workflow in the background. This design was important in order to avoid duplication of numerical logic and to keep the program behavior consistent between GUI and non-GUI execution.
+
+From a software point of view, the controller window acts as an interface layer between the user and the computational engine. User actions such as changing \(F\), \(k\), the diffusion coefficients, or the boundary condition do not directly create a new numerical method. Rather, they update the current simulation settings that are then passed to the same underlying model components used elsewhere in the project. The GUI therefore serves mainly as an organized control mechanism for the numerical implementation described in the previous sections of this chapter.
+
+This separation between interface logic and numerical logic has several advantages. First, it improves consistency, because the same underlying implementation is used regardless of whether the simulation is launched interactively or by script. Second, it simplifies maintenance, since numerical changes do not need to be reimplemented separately inside the GUI. Third, it supports verification, because GUI-based execution can be compared against non-GUI execution under the same parameter settings.
+
+A further practical benefit is that the GUI can focus on tasks that are specific to user interaction. These include enabling or disabling controls depending on the current simulation state, managing run/pause/restart behavior, updating status information, and coordinating visualization and recording options. The numerical solver itself remains part of the common simulation engine, while the GUI organizes how the user accesses that engine.
+
+Overall, the final design follows a clear principle: the scientific computation is performed by the shared Gray--Scott model implementation, and the GUI provides a convenient interactive layer on top of it. This makes the program easier to use without weakening the structural connection between the interface and the verified numerical core.
