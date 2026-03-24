@@ -1,25 +1,436 @@
 \chapter{Manual}
 
-\section{Requirements and Environment}
+\section{Requirements, Project Layout, and Execution Modes}
+\label{sec:manual_requirements}
 
-TEXT PLACEHOLDER.
+The Gray--Scott project is designed to be executed directly from the root folder of the repository. The main requirement is a working MATLAB installation. In addition, MATLAB App Designer support is needed for the graphical user interface, because the GUI is stored as an \texttt{.mlapp} file. No external datasets, third-party libraries, or user-created input files are required for a standard simulation run. The program generates its own initial conditions internally and writes the produced outputs automatically to result folders.
+
+For normal use, the most important files and folders are:
+
+\begin{itemize}
+    \item \texttt{run\_gui.m}: launcher for the graphical user interface.
+    \item \texttt{run\_model\_class.m}: launcher for one standard non-GUI simulation run.
+    \item \texttt{scripts/GrayScottController.mlapp}: App Designer GUI for interactive simulation and visualization.
+    \item \texttt{src/}: numerical core of the project, including parameter handling, grid generation, diffusion operators, reaction term, time stepping, model class, and export utilities.
+    \item \texttt{tests/}: verification, consistency, convergence, and benchmark scripts.
+    \item \texttt{results/}: output folder created automatically during simulations, tests, GUI usage, and benchmark runs.
+\end{itemize}
+
+From the user point of view, the project provides four practical execution modes:
+
+\begin{enumerate}
+    \item \textbf{GUI mode:} interactive use through the App Designer interface for manual exploration of the model.
+    \item \textbf{Non-GUI mode:} scripted execution through \texttt{run\_model\_class.m} for reproducible runs.
+    \item \textbf{Test mode:} execution of the main verification suite through \texttt{tests/run\_all\_tests.m}.
+    \item \textbf{Benchmark mode:} performance comparison of solver variants through \texttt{tests/benchmark\_solvers.m}.
+\end{enumerate}
+
+The project does not use external parameter files such as JSON, TXT, CSV, or XML files for standard runs. Instead, the simulation settings are stored in a MATLAB structure named \texttt{p}. In non-GUI mode, this structure is created directly in the launcher script. In GUI mode, the same parameter structure is managed internally through the interface controls. Thus, the effective input format of the program is a MATLAB parameter structure rather than a separate configuration file.
+
+In the final project version, the stencil-based diffusion solver is the default choice for normal execution. The matrix-based and full-array variants remain available mainly for verification and benchmarking.
+
+The following sections explain how to use the GUI, how to run the model without the GUI, how to execute the standard tests and the benchmark script, and where the generated outputs are stored.
 
 \section{How to Run the GUI}
+\label{sec:manual_gui}
 
-TEXT PLACEHOLDER.
+The graphical user interface is the most convenient execution mode for interactive exploration of the Gray--Scott model. To start it, open the project root folder in MATLAB and run
+
+\begin{verbatim}
+run_gui
+\end{verbatim}
+
+This command adds the required source folders to the MATLAB path and launches the App Designer application \texttt{GrayScottController}. The GUI is not a separate implementation of the model. It uses the same numerical core as the scripted workflow, but provides an interactive front end for changing settings and visualizing the results.
+
+At startup, the GUI creates a default Gray--Scott model automatically and opens a separate plot window. In the final project version, the GUI uses the stencil-based diffusion solver as its normal execution mode.
+
+The main user-controlled settings in the GUI are:
+
+\begin{itemize}
+    \item \textbf{Run control:} \texttt{Run}, \texttt{Pause}, \texttt{Reset}, and \texttt{Restart}.
+    \item \textbf{Reaction parameters:} the sliders for \texttt{F} and \texttt{k}.
+    \item \textbf{Displayed field:} selection of the plotted concentration field \texttt{U} or \texttt{V}.
+    \item \textbf{Boundary conditions:} \texttt{Periodic}, \texttt{Neumann}, or \texttt{Dirichlet}.
+    \item \textbf{Visual options:} colormap and plotting appearance.
+    \item \textbf{Recording options:} video frame rate and video format.
+    \item \textbf{Pattern presets:} predefined \texttt{F}-\texttt{k} combinations for characteristic pattern regimes.
+\end{itemize}
+
+The diffusion coefficients \texttt{D\_u} and \texttt{D\_v} are shown in the interface for transparency, but in the final GUI they are read-only. Therefore, the GUI is mainly intended for interactive study of pattern formation through the parameters \texttt{F} and \texttt{k}, while more detailed changes are better handled in the scripted non-GUI workflow.
+
+A typical GUI workflow is as follows:
+
+\begin{enumerate}
+    \item Start the application with \texttt{run\_gui}.
+    \item Select the field to display, usually \texttt{V}, because it shows the pattern structure clearly.
+    \item Adjust \texttt{F} and \texttt{k} manually or choose a preset from the menu.
+    \item Select the desired boundary-condition type.
+    \item Press \texttt{Run} to start the simulation and \texttt{Pause} to stop it temporarily.
+    \item Use \texttt{Restart} if the simulation should begin again with the current \texttt{F} and \texttt{k} values.
+    \item Use \texttt{Reset} if the GUI should return to its original default values and rebuild the initial state.
+\end{enumerate}
+
+The difference between \texttt{Reset} and \texttt{Restart} is important. \texttt{Restart} keeps the currently selected reaction parameters and rebuilds the model from the beginning using those values. \texttt{Reset}, in contrast, restores the original GUI defaults and then rebuilds the model. This allows the user either to repeat the current configuration or to return quickly to the startup configuration.
+
+The GUI also supports model storage through the \texttt{File} menu. The entry \texttt{Save model} stores the current model object as a MATLAB \texttt{.mat} file, and \texttt{Load model} reloads such a saved model. Video recording can also be activated directly in the GUI. When recording is enabled, the application writes a video file automatically to the \texttt{results/} folder.
+
+As a simple example, suppose that the user wants to inspect a spot-forming regime visually. A practical procedure is to start the GUI, select the \texttt{V} field, choose an appropriate spot-like preset from the menu, and press \texttt{Run}. If the generated pattern is interesting, recording can be activated before the next run so that the temporal evolution is saved automatically. If the same pattern should then be compared under a different boundary condition, the boundary-condition type can be changed and the model can be started again from the initial state.
+
+The GUI is therefore best suited for exploratory work, visual comparison of parameter choices, video recording, and demonstration of the model during presentations. For reproducible scripted runs with explicit parameter editing, the non-GUI workflow is more appropriate.
 
 \section{How to Run the Model Without the GUI}
+\label{sec:manual_nongui}
 
-TEXT PLACEHOLDER.
+The non-GUI workflow is intended for reproducible scripted simulations. It is the most suitable execution mode when parameter values should be documented explicitly, when a run should be repeated under controlled conditions, or when output files should be generated in an organized run folder.
+
+To execute one standard simulation without the graphical user interface, open the root folder of the project in MATLAB and run
+
+\begin{verbatim}
+run_model_class
+\end{verbatim}
+
+The script creates the parameter structure \texttt{p}, normalizes it, builds the computational grid, initializes the \texttt{GrayScottModel} object, performs the time-stepping loop, optionally updates a live figure, optionally exports PNG snapshots, and finally stores the last simulation state.
+
+\subsection*{Basic workflow}
+
+The normal workflow of \texttt{run\_model\_class.m} is:
+
+\begin{enumerate}
+    \item add the \texttt{src/} folder to the MATLAB path,
+    \item create a default parameter structure \texttt{p},
+    \item select the diffusion mode,
+    \item call \texttt{finalizeParams(p)} to normalize and validate the settings,
+    \item create a timestamp-based output folder inside \texttt{results/},
+    \item run the simulation,
+    \item save the main outputs of the run.
+\end{enumerate}
+
+In the final project version, the script uses the stencil solver as the default solver. Thus, a normal call of \texttt{run\_model\_class} already starts from the recommended standard execution mode.
+
+\subsection*{Parameter format}
+
+The non-GUI launcher does not read a separate external parameter file. Instead, all simulation inputs are defined directly in MATLAB through the structure \texttt{p}. The most important fields are:
+
+\begin{itemize}
+    \item \texttt{Du}, \texttt{Dv}, \texttt{F}, \texttt{k}: Gray--Scott model parameters,
+    \item \texttt{Nx}, \texttt{Ny}, \texttt{Lx}, \texttt{Ly}: grid and domain parameters,
+    \item \texttt{dt}, \texttt{T}: time-step size and final time,
+    \item \texttt{seed}, \texttt{icType}, \texttt{icPerturb}: initial-condition settings,
+    \item \texttt{diffusionMode}: solver selection,
+    \item \texttt{plotField}, \texttt{plotEvery}, \texttt{savePngEvery}: output control,
+    \item \texttt{BC}: per-side boundary-condition structure.
+\end{itemize}
+
+Some of these fields use fixed keywords that must be written exactly:
+
+\begin{itemize}
+    \item \texttt{diffusionMode}: \texttt{"matrix"}, \texttt{"stencil"}, or \texttt{"full"},
+    \item \texttt{plotField}: \texttt{"u"} or \texttt{"v"},
+    \item \texttt{p.BC.<side>.type}: \texttt{"periodic"}, \texttt{"dirichlet"}, or \texttt{"neumann"},
+    \item \texttt{defaultParams(...)} presets: \texttt{"baseline"} or \texttt{"pearson"}.
+\end{itemize}
+
+The call to \texttt{finalizeParams(p)} is important because it checks and normalizes these entries before the simulation starts. If a keyword is written incorrectly, the script stops with an error instead of running with an inconsistent setup.
+
+\subsection*{Important execution rule}
+
+The script computes the number of time steps as \texttt{Nt = T / dt}. Therefore, the chosen values of \texttt{T} and \texttt{dt} must be compatible such that \texttt{T/dt} is an integer. Otherwise the script stops with an error. When parameters are modified manually, this condition should always be checked.
+
+\subsection*{Simple examples}
+
+\textbf{Example 1: standard run.}  
+For a default run with the standard stencil solver, no manual changes are needed. Open the project root folder and execute
+
+\begin{verbatim}
+run_model_class
+\end{verbatim}
+
+This uses the default parameter structure, runs one simulation, and writes the outputs automatically into a newly created subfolder of \texttt{results/}.
+
+\medskip
+
+\textbf{Example 2: change the preset and output settings.}  
+A user may want to start from the Pearson-style preset, visualize the \texttt{u}-field, and export images less frequently. In that case, the beginning of \texttt{run\_model\_class.m} can be edited as follows:
+
+\begin{verbatim}
+p = defaultParams("pearson");
+p.diffusionMode = "stencil";
+p.plotField = "u";
+p.plotEvery = 50;
+p.savePngEvery = 100;
+p = finalizeParams(p);
+\end{verbatim}
+
+After saving the file, run
+
+\begin{verbatim}
+run_model_class
+\end{verbatim}
+
+The simulation will then use the Pearson-type parameter set and export snapshots of the selected field according to the specified output cadence.
+
+\medskip
+
+\textbf{Example 3: modify one model parameter and the boundary condition.}  
+To compare the influence of a different feed rate and a different boundary-condition type, the parameter block can be edited, for example, to
+
+\begin{verbatim}
+p = defaultParams();
+p.diffusionMode = "stencil";
+p.F = 0.022;
+p.k = 0.051;
+
+p.BC.left.type   = "neumann";
+p.BC.right.type  = "neumann";
+p.BC.bottom.type = "neumann";
+p.BC.top.type    = "neumann";
+
+p = finalizeParams(p);
+\end{verbatim}
+
+This produces a run with modified reaction parameters and homogeneous Neumann conditions on all four boundaries.
+
+\subsection*{Plotting and PNG export}
+
+The non-GUI script distinguishes between live plotting and image export:
+
+\begin{itemize}
+    \item \texttt{plotEvery} controls how often the MATLAB figure is updated during the run,
+    \item \texttt{savePngEvery} controls how often PNG files are written to disk.
+\end{itemize}
+
+A value of \texttt{0} disables the corresponding feature. For example, setting
+
+\begin{verbatim}
+p.plotEvery = 0;
+p.savePngEvery = 0;
+\end{verbatim}
+
+disables intermediate live plotting and intermediate PNG export. The script still saves the final state and exports one final snapshot at the end of the run.
 
 \section{How to Run the Tests}
+\label{sec:manual_tests}
 
-TEXT PLACEHOLDER.
+The project contains a structured verification folder for automated checks of the numerical implementation. These tests are intended to confirm that the solver behaves correctly with respect to operator properties, boundary-condition handling, manufactured-solution verification, time-step behavior, and agreement between different diffusion implementations.
+
+In the final project version, the standard test entry point is
+
+\begin{verbatim}
+tests/run_all_tests
+\end{verbatim}
+
+If MATLAB is already opened inside the \texttt{tests/} folder, the same suite can also be started with
+
+\begin{verbatim}
+run_all_tests
+\end{verbatim}
+
+The script adds the required project paths automatically, executes the selected verification tests one after another, prints a pass/fail summary in the MATLAB command window, and stores a summary file under \texttt{results/tests/}.
+
+\subsection*{Standard verification suite}
+
+The standard test runner contains the important fast-to-moderate checks that should be executed routinely. In the final repository, these are:
+
+\begin{itemize}
+    \item \texttt{test\_laplacian\_constant}: checks that the Laplacian behaves correctly for a constant field.
+    \item \texttt{test\_laplacian\_symmetry}: checks the expected symmetry property of the discrete operator.
+    \item \texttt{test\_boundary\_conditions}: verifies boundary-condition handling.
+    \item \texttt{test\_timestep\_halving\_smoke}: short smoke test for time-step refinement behavior.
+    \item \texttt{test\_mms\_endtoend}: manufactured-solution verification of the full solver workflow.
+    \item \texttt{test\_mms\_operator\_convergence}: convergence check for the discrete operator.
+    \item \texttt{test\_timestep\_convergence}: verification of the expected time-step behavior.
+    \item \texttt{test\_laplacian\_stencil\_equivalence}: agreement check between stencil and matrix-style Laplacian application.
+    \item \texttt{test\_matrix\_stencil\_endtoend\_equivalence}: end-to-end comparison between matrix and stencil solver paths.
+\end{itemize}
+
+This curated set is the recommended standard verification procedure for routine use because it covers the essential numerical properties without including the longest validation scripts.
+
+\subsection*{Long or special tests to run separately}
+
+Not every script in the \texttt{tests/} folder belongs to the standard routine suite. Some checks are intentionally kept separate because they are slower, more qualitative, or intended for special validation tasks.
+
+\textbf{1. Pearson pattern sanity test}
+
+The script
+
+\begin{verbatim}
+tests/test_pattern_sanity_pearson
+\end{verbatim}
+
+is a long qualitative validation run based on Pearson-style cases. It is intended for visual sanity checking of the produced patterns rather than for fast routine testing.
+
+\medskip
+
+\textbf{2. Grid-refinement study}
+
+The script
+
+\begin{verbatim}
+tests/test_grayscott_grid_refinement
+\end{verbatim}
+
+performs a dedicated grid-refinement study. Because it is more expensive than the routine checks and is used for a specific numerical study, it is better treated as a standalone verification script.
+
+\medskip
+
+\textbf{3. GUI versus non-GUI consistency check}
+
+The folder \texttt{tests/gui\_consistency/} contains a separate workflow to verify that the GUI reproduces the same numerical results as the non-GUI execution path. This check is not part of \texttt{run\_all\_tests}, because it requires a dedicated comparison workflow. The recommended procedure is:
+
+\begin{verbatim}
+ref = run_nongui_reference_dump();
+gui = run_gui_consistency_dump();
+T   = compare_gui_nongui(ref.refFile, gui.guiFile);
+\end{verbatim}
+
+This workflow generates reference dumps, compares intermediate and final states, and saves comparison outputs for later inspection.
+
+For ordinary development and routine verification, the standard call to \texttt{run\_all\_tests} is sufficient and recommended. The standalone scripts should be used only when their specific purpose is needed.
 
 \section{How to Run the Benchmarks}
+\label{sec:manual_benchmarks}
 
-TEXT PLACEHOLDER.
+The benchmark scripts are intended for systematic performance comparison of the available diffusion implementations. In the final project version, the main benchmark entry point is the MATLAB function \texttt{benchmark\_solvers()}, which compares the sparse-matrix solver, the stencil-based solver, and the dense/full solver under a fixed benchmark protocol. The benchmark is not a verification test in the strict sense; instead, it measures runtime and memory-related quantities for the different implementations under controlled conditions.
+
+To run the benchmark from MATLAB, a practical procedure from the project root folder is
+
+\begin{verbatim}
+addpath(genpath(fullfile(pwd,'tests')));
+benchmark_solvers
+\end{verbatim}
+
+The benchmark script itself adds the required source folders automatically, so the main purpose of the \texttt{addpath} command above is to make the benchmark function callable from the project root. After the run finishes, MATLAB writes the results into a new timestamp-based benchmark folder under \texttt{results/}.
+
+\subsection*{What the benchmark measures}
+
+The benchmark compares three diffusion realizations:
+
+\begin{itemize}
+    \item \texttt{matrix}: sparse Laplacian matrix multiplication,
+    \item \texttt{stencil}: matrix-free stencil diffusion,
+    \item \texttt{full}: dense/full Laplacian matrix multiplication.
+\end{itemize}
+
+It evaluates these solvers in two timing modes:
+
+\begin{itemize}
+    \item \texttt{compute\_off}: solver runtime without live visualization,
+    \item \texttt{render\_on}: solver runtime with live display updates.
+\end{itemize}
+
+The timed region contains only the stepping loop. Grid construction, operator setup, initial-condition preparation, and warm-up steps are excluded from the timed interval. This makes the benchmark suitable for comparing the solver cost itself rather than the total startup overhead.
+
+\subsection*{Default benchmark setup}
+
+In the final repository, the benchmark uses the following default configuration:
+
+\begin{itemize}
+    \item grid sizes: \texttt{32x32}, \texttt{64x64}, \texttt{128x128}, \texttt{256x256}, and \texttt{512x512},
+    \item dense/full solver only on \texttt{32x32}, \texttt{64x64}, and \texttt{128x128},
+    \item warm-up steps: \texttt{50},
+    \item timed steps: \texttt{500},
+    \item repetitions per case: \texttt{7},
+    \item random seed: \texttt{1},
+    \item live-display update interval in render mode: every \texttt{10} steps.
+\end{itemize}
+
+These settings are already encoded in the final benchmark script and normally do not need to be changed for routine use.
+
+\subsection*{Simple benchmark example}
+
+A standard benchmark run consists of the following MATLAB commands:
+
+\begin{verbatim}
+addpath(genpath(fullfile(pwd,'tests')));
+benchmark_solvers
+\end{verbatim}
+
+After the computation finishes, inspect the newest benchmark folder inside \texttt{results/}. It contains the main benchmark data files, including a MATLAB data file and a CSV table for later analysis.
+
+\subsection*{Interpretation note}
+
+The benchmark is designed specifically to compare diffusion implementations under a common numerical setup. The diffusion operators use periodic connectivity internally, while physical boundary conditions such as Dirichlet or Neumann are enforced after each time step rather than being part of the benchmarked operator itself. Therefore, the benchmark should be interpreted as a solver-performance study and not as a comparison of different physical boundary-condition models.
 
 \section{Output Folders and Generated Files}
+\label{sec:manual_outputs}
 
-TEXT PLACEHOLDER.
+The project writes its generated data automatically into output folders, so the user normally does not need to create result directories manually. Most outputs are stored under the folder \texttt{results/}. The exact files depend on the selected execution mode.
+
+\subsection*{Outputs of a non-GUI simulation run}
+
+When \texttt{run\_model\_class} is executed, the script creates a new timestamp-based subfolder inside \texttt{results/}. Its structure has the form
+
+\begin{verbatim}
+results/<timestamp>_<caseName>/
+\end{verbatim}
+
+This folder collects the outputs of exactly one scripted simulation run. The most important generated files are:
+
+\begin{itemize}
+    \item \texttt{meta.mat}: MATLAB data file containing metadata of the run, including the parameter structure.
+    \item \texttt{log.txt}: text summary of the most important run settings.
+    \item PNG image files: exported snapshots of the selected field during the run and at the final state.
+    \item \texttt{final\_state.mat}: MATLAB file containing the final numerical state of the simulation.
+\end{itemize}
+
+These files make the non-GUI workflow reproducible and suitable for later inspection.
+
+\subsection*{Outputs of the GUI}
+
+The GUI also writes files automatically into the \texttt{results/} folder when save or recording operations are used. In practical use, the most relevant GUI-generated outputs are:
+
+\begin{itemize}
+    \item saved model files in MATLAB \texttt{.mat} format,
+    \item recorded video files of simulation runs.
+\end{itemize}
+
+The saved model files are useful when a simulation state should be reopened later from the GUI. The video files are produced when recording is enabled in the interface.
+
+\subsection*{Outputs of the standard test suite}
+
+The standard verification suite started by
+
+\begin{verbatim}
+tests/run_all_tests
+\end{verbatim}
+
+stores its collected summary in
+
+\begin{verbatim}
+results/tests/results_summary.mat
+\end{verbatim}
+
+This file contains the returned result structures of the executed routine tests. The command window output during the test run provides the immediate pass/fail feedback, while \texttt{results\_summary.mat} stores the structured data for later use.
+
+Longer standalone validation scripts may generate their own outputs depending on the specific workflow. For example, dedicated GUI consistency checks create separate comparison data for inspection.
+
+\subsection*{Outputs of the benchmark workflow}
+
+The benchmark function creates a separate timestamp-based output folder of the form
+
+\begin{verbatim}
+results/benchmarks_<timestamp>/
+\end{verbatim}
+
+Inside this folder, the main generated files are:
+
+\begin{itemize}
+    \item \texttt{benchmark\_results.mat}: raw MATLAB benchmark data,
+    \item \texttt{benchmark\_table.csv}: tabulated benchmark summary.
+\end{itemize}
+
+The MATLAB file is useful for later detailed analysis in MATLAB, while the CSV file is convenient for inspection, table generation, or further processing.
+
+\subsection*{Practical interpretation of file formats}
+
+The generated file formats in the project have the following practical roles:
+
+\begin{itemize}
+    \item \texttt{.mat}: MATLAB-native storage of states, models, metadata, and structured results.
+    \item \texttt{.txt}: human-readable summaries such as run logs.
+    \item \texttt{.png}: image export for simulation snapshots.
+    \item video files: recorded GUI animations for presentation and visual inspection.
+    \item \texttt{.csv}: tabulated benchmark data for easy comparison and export.
+\end{itemize}
+
+Thus, the project does not require external input data files for normal execution, but it does produce several well-defined output formats for analysis, visualization, and documentation.
