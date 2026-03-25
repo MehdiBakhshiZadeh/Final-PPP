@@ -3,7 +3,7 @@
 
 The execution structure of the final program is summarized in Figures~\ref{fig:program_flow_setup} and \ref{fig:program_flow_loop}. The first flowchart shows the initialization phase, and the second shows the repeated simulation loop.
 
-\begin{figure}[htbp]
+\begin{figure}[ht!]
 \centering
 \footnotesize
 \begin{tikzpicture}[
@@ -53,7 +53,9 @@ The execution structure of the final program is summarized in Figures~\ref{fig:p
 \label{fig:program_flow_setup}
 \end{figure}
 
-\begin{figure}[htbp]
+The setup phase shown in Figure~\ref{fig:program_flow_setup} highlights that the final program follows a structured initialization sequence before time stepping begins. The execution starts either from the non-GUI runner \texttt{run\_model\_class.m} or from the graphical interface via \texttt{run\_gui.m}. Default settings and user-defined modifications are then combined and passed through \texttt{finalizeParams.m}, where parameters are checked and normalized into a consistent form. After that, \texttt{buildGrid.m} creates the computational grid and mesh-related data, and \texttt{makeOperator.m} constructs the selected diffusion backend. Finally, the \texttt{GrayScottModel} object is created, the initial state is prepared, and all information required for the simulation loop is made available in a unified model representation.
+
+\begin{figure}[ht!]
 \centering
 \footnotesize
 \begin{tikzpicture}[
@@ -117,3 +119,5 @@ The execution structure of the final program is summarized in Figures~\ref{fig:p
 \caption{Repeated simulation loop of the final Gray--Scott solver.}
 \label{fig:program_flow_loop}
 \end{figure}
+
+The loop phase in Figure~\ref{fig:program_flow_loop} shows how the initialized model is advanced until the stopping criterion is reached. At each iteration, \texttt{eulerStep.m} performs the main numerical update by combining diffusion, reaction, optional source terms, and boundary enforcement in one time-step operation. The model state, current time, step counter, and diagnostic information are then updated consistently. Depending on the user settings, selected steps may trigger plotting or frame export, but these optional actions do not change the solver logic itself. Once the final time or stop condition is reached, the program stores the final state together with metadata and logging information before terminating in an orderly way.

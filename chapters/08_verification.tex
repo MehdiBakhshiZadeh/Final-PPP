@@ -366,7 +366,7 @@ Mode & maxErr \(u\) & maxErr \(v\) \\
 \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[H]
 \centering
 \caption{Neumann boundary-condition verification results for all diffusion modes.}
 \label{tab:bc_neumann_verification}
@@ -381,13 +381,22 @@ Mode & maxErr \(u\) & maxErr \(v\) \\
 \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[H]
 \centering
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
 \caption{Mixed boundary-condition robustness results for all diffusion modes after 400 steps.}
 \label{tab:bc_mixed_verification}
 \begin{tabular}{|c|c|c|c|c|c|c|}
 \hline
-Mode & maxDir \(u\) & maxDir \(v\) & maxNeu \(u\) & maxNeu \(v\) & interior change \(\Delta u\) & interior change \(\Delta v\) \\
+Mode
+& \shortstack{maxDir\\\(u\)}
+& \shortstack{maxDir\\\(v\)}
+& \shortstack{maxNeu\\\(u\)}
+& \shortstack{maxNeu\\\(v\)}
+& \shortstack{interior\\change \(\Delta u\)}
+& \shortstack{interior\\change \(\Delta v\)} \\
 \hline
 \texttt{matrix}  & \(0.000\times 10^{0}\) & \(0.000\times 10^{0}\) & \(0.000\times 10^{0}\) & \(0.000\times 10^{0}\) & \(2.992\times 10^{-2}\) & \(4.982\times 10^{-2}\) \\
 \texttt{stencil} & \(0.000\times 10^{0}\) & \(0.000\times 10^{0}\) & \(0.000\times 10^{0}\) & \(0.000\times 10^{0}\) & \(2.992\times 10^{-2}\) & \(4.982\times 10^{-2}\) \\
@@ -670,7 +679,7 @@ tests/gui_consistency/compare_gui_nongui.m
 \end{verbatim}
 
 \paragraph{How to run the test case.}
-From the project root or from the \texttt{tests/gui\_consistency} workflow with the project paths available, execute:
+Run the workflow either from the project root or from \texttt{tests/gui\_consistency}. Make sure that the project paths are available. Then execute:
 \begin{verbatim}
 ref = run_nongui_reference_dump();
 gui = run_gui_consistency_dump();
@@ -941,7 +950,7 @@ and the reported final \(L^2\) errors were
 \mathrm{err}_V^{L^2} = 5.974\times 10^{-4}.
 \]
 
-These errors are small and remain fully consistent with a correctly implemented manufactured-solution workflow on the chosen grid and time-step size. Figure~\ref{fig:mms_endtoend_errV} shows the spatial error field for \(v\) at the final time. The smooth, structured error pattern is typical for a discretization error field and does not indicate instability or implementation failure.
+These errors are small for the chosen grid and time-step size. They are consistent with a correctly implemented manufactured-solution workflow. Figure~\ref{fig:mms_endtoend_errV} shows the spatial error field for \(v\) at the final time. The smooth, structured pattern is typical of discretization error and does not indicate instability or implementation failure.
 
 \begin{figure}[htbp]
 \centering
@@ -1109,28 +1118,28 @@ At the same time, the interpretation of this test should remain careful. Because
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.74\textwidth]{figures/verification/pattern_sanity/alpha_t100000_U.png}
+\includegraphics[width=0.95\textwidth]{figures/verification/pattern_sanity/alpha_t100000_U.png}
 \caption{Pearson \texttt{alpha} case: representative \(U\)-field snapshot at \(t=100000\). The morphology is dominated by separated spot-like structures in a mostly high-\(U\) background.}
 \label{fig:pearson_alpha_snapshot}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.74\textwidth]{figures/verification/pattern_sanity/epsilon_t100000_U.png}
+\includegraphics[width=0.95\textwidth]{figures/verification/pattern_sanity/epsilon_t100000_U.png}
 \caption{Pearson \texttt{epsilon} case: representative \(U\)-field snapshot at \(t=100000\). Compared with \texttt{alpha}, the pattern is denser and more uniformly populated by small spot-like structures.}
 \label{fig:pearson_epsilon_snapshot}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.74\textwidth]{figures/verification/pattern_sanity/kappa_t100000_U.png}
+\includegraphics[width=0.95\textwidth]{figures/verification/pattern_sanity/kappa_t100000_U.png}
 \caption{Pearson \texttt{kappa} case: representative \(U\)-field snapshot at \(t=100000\). The pattern exhibits a broad labyrinth-like stripe morphology rather than isolated spots.}
 \label{fig:pearson_kappa_snapshot}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.74\textwidth]{figures/verification/pattern_sanity/theta_t100000_U.png}
+\includegraphics[width=0.95\textwidth]{figures/verification/pattern_sanity/theta_t100000_U.png}
 \caption{Pearson \texttt{theta} case: representative \(U\)-field snapshot at \(t=100000\). The pattern is also labyrinth-like, but with a more intricate and locally curved stripe network than in the \texttt{kappa} case.}
 \label{fig:pearson_theta_snapshot}
 \end{figure}

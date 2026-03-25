@@ -30,16 +30,16 @@ Figure~\ref{fig:bench_compute_runtime} shows the compute-only runtime results. T
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.82\textwidth]{figures/compute_runtime_loglog.png}
+    \includegraphics[width=0.90\textwidth]{figures/compute_runtime_loglog.png}
     \caption{Compute-only benchmark runtime for the three diffusion realizations.}
     \label{fig:bench_compute_runtime}
 \end{figure}
 
-
+The compute-only results show that neither realistic solver is uniformly fastest on all grids. The stencil solver performs best at \(64\times64\), \(128\times128\), and especially \(256\times256\), while the sparse-matrix solver is slightly better at \(32\times32\) and clearly better at \(512\times512\). Therefore, the final recommendation cannot be based on compute-only runtime alone.
 
 \begin{table}[H]
     \centering
-    \caption{Compact compute-only comparison of the sparse-matrix and stencil solvers. Values of \(\text{matrix}/\text{stencil}>1\) favour the stencil solver, while values below 1 favour the sparse-matrix solver.}
+    \caption[Compute-only comparison of sparse-matrix and stencil solvers]{Compact compute-only comparison of the sparse-matrix and stencil solvers. Values of \(\text{matrix}/\text{stencil}>1\) favour the stencil solver, while values below 1 favour the sparse-matrix solver.}
     \label{tab:bench_compute_compact}
     \begin{tabular}{rcccc}
         \toprule
@@ -54,7 +54,6 @@ Figure~\ref{fig:bench_compute_runtime} shows the compute-only runtime results. T
     \end{tabular}
 \end{table}
 
-The compute-only results show that neither realistic solver is uniformly fastest on all grids. The stencil solver performs best at \(64\times64\), \(128\times128\), and especially \(256\times256\), while the sparse-matrix solver is slightly better at \(32\times32\) and clearly better at \(512\times512\). Therefore, the final recommendation cannot be based on compute-only runtime alone.
 
 \section{Live-Display Runtime Comparison}
 

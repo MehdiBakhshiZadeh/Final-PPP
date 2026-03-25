@@ -21,8 +21,9 @@ From the user point of view, the project provides four practical execution modes
 \begin{enumerate}
     \item \textbf{GUI mode:} interactive use through the App Designer interface for manual exploration of the model.
     \item \textbf{Non-GUI mode:} scripted execution through \texttt{run\_model\_class.m} for reproducible runs.
-    \item \textbf{Test mode:} execution of the main verification suite through \texttt{tests/run\_all\_tests.m}.
-    \item \textbf{Benchmark mode:} performance comparison of solver variants through \texttt{tests/benchmark\_solvers.m}.
+    \item \textbf{Test mode:} execution of the main verification suite. The entry script is\\
+     \texttt{tests/run\_all\_tests.m}.
+    \item \textbf{Benchmark mode:} performance comparison of solver variants. The entry script is \texttt{tests/benchmark\_solvers.m}.
 \end{enumerate}
 
 The project does not use external parameter files such as JSON, TXT, CSV, or XML files for standard runs. Instead, the simulation settings are stored in a MATLAB structure named \texttt{p}. In non-GUI mode, this structure is created directly in the launcher script. In GUI mode, the same parameter structure is managed internally through the interface controls. Thus, the effective input format of the program is a MATLAB parameter structure rather than a separate configuration file.
@@ -240,7 +241,8 @@ The standard test runner contains the important fast-to-moderate checks that sho
     \item \texttt{test\_mms\_operator\_convergence}: convergence check for the discrete operator.
     \item \texttt{test\_timestep\_convergence}: verification of the expected time-step behavior.
     \item \texttt{test\_laplacian\_stencil\_equivalence}: agreement check between stencil and matrix-style Laplacian application.
-    \item \texttt{test\_matrix\_stencil\_endtoend\_equivalence}: end-to-end comparison between matrix and stencil solver paths.
+    \item \path{test_matrix_stencil_endtoend_equivalence}\\
+    end-to-end comparison between matrix and stencil solver paths.
 \end{itemize}
 
 This curated set is the recommended standard verification procedure for routine use because it covers the essential numerical properties without including the longest validation scripts.

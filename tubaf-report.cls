@@ -21,7 +21,7 @@
 
 \RequirePackage{tubaf-marks}
 \SetKeys[tubaf-marks]{
-    footmark=author-title
+    footmark=author
 }
 
 \RequirePackage{tubaf-fonts}

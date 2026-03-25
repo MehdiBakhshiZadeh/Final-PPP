@@ -7,7 +7,8 @@ This chapter describes how the Gray--Scott reaction--diffusion model is solved n
 The final program is implemented in MATLAB R2025b and follows a deliberately modular design. The physical model is represented by two coupled scalar fields, $u(x,y,t)$ and $v(x,y,t)$, on a two-dimensional rectangular domain. In the code, the complete simulation pipeline is organized in the following sequence:
 \begin{quote}
 \small\ttfamily
-defaultParams $\rightarrow$ finalizeParams $\rightarrow$ buildGrid $\rightarrow$ makeOperator $\rightarrow$\\ GrayScottModel $\rightarrow$ eulerStep
+defaultParams $\rightarrow$ finalizeParams $\rightarrow$ buildGrid\\
+makeOperator $\rightarrow$ GrayScottModel $\rightarrow$ eulerStep
 \end{quote}
 This separation is important for both correctness and maintainability. Parameter definition, grid generation, operator construction, time stepping, plotting, and file export are not mixed in one monolithic script. Instead, each step has a well-defined responsibility, which makes the solver easier to verify, extend, and defend.
 
@@ -56,13 +57,13 @@ k = j + (i-1)N_y,
 i=1,\dots,N_x,\quad j=1,\dots,N_y.
 \label{eq:column_major_mapping_numimpl}
 \end{equation}
-This means that the $y$-index varies fastest in memory, while the $x$-index advances in blocks of size $N_y$. The choice is not arbitrary; it is exactly the storage convention used internally by MATLAB when a matrix is reshaped or flattened. As a result, the operations
+This means that the $y$-index varies fastest in memory, while the $x$-index advances in blocks of size $N_y$. The choice is not arbitrary; it is exactly the storage convention used internally by MATLAB when a matrix is reshaped or flattened. As a result, the two representations are fully consistent:
 \[
-u = U(:), \qquad U = \texttt{reshape}(u,N_y,N_x)
+u = U(:), \qquad U = \texttt{reshape}(u,N_y,N_x).
 \]
-are fully consistent and do not require any manual permutation of indices. This consistency is essential for the correctness of the Kronecker-product Laplacian, because the matrix assembly must follow the same indexing convention as the state vectors used in time stepping.
+They do not require any manual permutation of indices. This consistency is essential for the correctness of the Kronecker-product Laplacian, because the matrix assembly must follow the same indexing convention as the state vectors used in time stepping.
 
-The same storage convention also explains an important aspect of the implementation architecture. The sparse and dense operator backends apply the discrete Laplacian by matrix--vector multiplication, whereas the stencil backend reshapes the vector back into a two-dimensional field, evaluates neighbor contributions directly in array form, and then re-vectorizes the result. Since all three backends are tied to the same column-major mapping, they represent the same discrete spatial operator even though their internal realization differs. This common data layout is one of the reasons why equivalence tests between the matrix and stencil solvers can be performed in a clean and reliable way.
+The same storage convention also explains an important aspect of the implementation architecture. The sparse and dense operator backends apply the discrete Laplacian by matrix--vector multiplication. In contrast, the stencil backend reshapes the vector back into a two-dimensional field, evaluates neighbor contributions directly in array form, and then re-vectorizes the result. Since all three backends are tied to the same column-major mapping, they represent the same discrete spatial operator even though their internal realization differs. This common data layout is one of the reasons why equivalence tests between the matrix and stencil solvers can be performed in a clean and reliable way.
 
 Another important practical aspect is the initialization of the state. The function \texttt{initialCondition.m} creates two $N_y \times N_x$ arrays, initially with $U=1$ and $V=0$, and then inserts a centered square perturbation region with modified concentrations. Small random perturbations can be added as well. Reproducibility is ensured through a user-defined random seed stored in the parameter structure and activated when the \texttt{GrayScottModel} object initializes or resets the state. This means that two runs with the same parameters and the same seed reproduce the same initial fields, which is essential for fair solver comparison, GUI consistency tests, and benchmark reproducibility.
 
@@ -356,7 +357,7 @@ The boundary-condition handling is normalized in \path{src/core/finalizeParams.m
 
 The essential implementation idea is that the discrete diffusion operator itself is built with periodic connectivity, while non-periodic boundary conditions are enforced afterward by explicit overwrite of the boundary nodes. Thus, the diffusion operator remains the same mathematical object across all solver backends, and boundary handling is treated as a separate layer in the update process. This choice is especially useful in a code base that supports sparse-matrix, dense-matrix, and matrix-free stencil realizations of the same Laplacian, because it avoids having to build a different operator for every possible combination of side conditions.
 
-After one explicit Euler step has been formed, the function \path{src/core/applyBoundaryConditions.m} reshapes the state vectors into two-dimensional arrays,
+After one explicit Euler step, \texttt{applyBoundaryConditions.m} reshapes the state vectors into two-dimensional arrays:
 \[
 U = \mathrm{reshape}(u,N_y,N_x),
 \qquad
@@ -462,7 +463,7 @@ If the mode is set to \path{matrix}, the function \path{src/operators/buildLapla
 
 If the mode is set to \path{full}, the same operator is converted to a dense matrix representation and stored explicitly. The diffusion term is then evaluated by ordinary dense matrix--vector multiplication. This mode is not intended for large-scale simulation, because a dense matrix for a two-dimensional Laplacian quickly becomes prohibitively expensive in memory. Its main role in the final code is therefore as a small-grid reference realization. Since the operator is stored completely and explicitly, it can be useful for debugging, sanity checks, and direct comparison on small problem sizes. For serious production runs, however, the dense backend is not the preferred choice.
 
-If the mode is set to \path{stencil}, no global Laplacian matrix is stored. Instead, the code constructs a compact description of the operator in \path{src/operators/buildStencil2D.m}, containing only the information needed to evaluate the five-point stencil directly on the grid. During each step, \path{src/core/applyDiffusion.m} calls \path{src/operators/applyLaplacianStencil.m}, which reshapes the vectorized state into a two-dimensional array, forms the neighboring values by periodic shifts, evaluates the stencil locally, and vectorizes the result again. This backend is therefore matrix-free: it applies the same discrete operator without ever assembling the full global matrix.
+If the mode is set to \texttt{stencil}, no global Laplacian matrix is stored. Instead, the code builds a compact stencil description in \texttt{buildStencil2D.m}. This structure contains only the information needed to evaluate the five-point stencil directly on the grid. During each step, \texttt{applyDiffusion.m} calls \texttt{applyLaplacianStencil.m}. That routine reshapes the vectorized state into a two-dimensional array, forms the neighboring values by periodic shifts, evaluates the stencil locally, and then vectorizes the result again. This backend is therefore matrix-free: it applies the same discrete operator without assembling the full global matrix.
 
 The three backends can be summarized conceptually as follows:
 \begin{itemize}
@@ -561,7 +562,7 @@ The first concept was an all-in-one interface in which the simulation controls a
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.92\textwidth]{figures/mockup-all-in-one.png}
+    \includegraphics[width=0.85\textwidth]{figures/mockup-all-in-one.png}
     \caption{Early all-in-one GUI mockup combining controls and simulation visualization in a single window.}
     \label{fig:gui_mockup_allinone}
 \end{figure}
@@ -570,7 +571,7 @@ For this reason, the design was revised toward a two-window concept. In this sec
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.92\textwidth]{figures/mockup-two-windows.png}
+    \includegraphics[width=0.85\textwidth]{figures/mockup-two-windows.png}
     \caption{Revised GUI mockup with separated controller and visualization windows.}
     \label{fig:gui_mockup_twowindows}
 \end{figure}
