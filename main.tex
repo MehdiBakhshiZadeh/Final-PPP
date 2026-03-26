@@ -45,18 +45,14 @@ Supervisor: PD Dr.\ rer.\ nat.\ habil.\ Uwe Pr\"ufert
 
 \pagenumbering{roman}
 
+% Prevent blank right-hand pages in front matter
+\let\cleardoublepage\clearpage
+
 \tableofcontents
-\clearpage
-
 \listoffigures
-\clearpage
-
 \listoftables
-\clearpage
 
-\begin{abstract}
 \input{chapters/00_abstract}
-\end{abstract}
 \clearpage
 
 \pagenumbering{arabic}
