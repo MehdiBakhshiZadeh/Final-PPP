@@ -1,12 +1,12 @@
 \chapter{Benchmark and Solver Performance Study}
 
-\section{Benchmark Goal and Design}
+\section{Benchmark goal and design}
 
 After the internal computation-time study of Chapter~9, a broader benchmark was carried out to compare the practical performance of the implemented diffusion solvers and to support the final solver choice. In contrast to Chapter~9, which analyzed the runtime structure of one representative program run, the present chapter compares the solver variants themselves under the same verified Gray--Scott problem and under controlled benchmark conditions.
 
 The benchmark considers the three implemented diffusion realizations: the dense-matrix formulation, the sparse-matrix formulation, and the stencil-based formulation. The goal is to compare their runtime, live-display behaviour, memory demand, and overall suitability as the default solver of the final program.
 
-\section{Benchmark Setup}
+\section{Benchmark setup}
 
 The compared solver modes are \texttt{full} (dense matrix), \texttt{matrix} (sparse matrix), and \texttt{stencil} (matrix-free stencil). Two benchmark modes were used:
 \begin{itemize}
@@ -35,11 +35,11 @@ To run the benchmark from the project \texttt{tests} folder, execute:
 benchmark_solvers
 \end{verbatim}
 
-\section{Compute-Only Runtime Comparison}
+\section{Compute-only runtime comparison}
 
 Figure~\ref{fig:bench_compute_runtime} shows the compute-only runtime results. The dense solver is included only as a small-scale reference and is not competitive beyond the smallest grids. The practically relevant comparison is therefore between the sparse-matrix and stencil-based implementations.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.90\textwidth]{figures/compute_runtime_loglog.png}
     \caption{Compute-only benchmark runtime for the three diffusion realizations.}
@@ -48,7 +48,7 @@ Figure~\ref{fig:bench_compute_runtime} shows the compute-only runtime results. T
 
 The compute-only results show that neither realistic solver is uniformly fastest on all grids. The stencil solver performs best at \(64\times64\), \(128\times128\), and especially \(256\times256\), while the sparse-matrix solver is slightly better at \(32\times32\) and clearly better at \(512\times512\). Therefore, the final recommendation cannot be based on compute-only runtime alone.
 
-\begin{table}[H]
+\begin{table}[htbp]
     \centering
     \caption[Compute-only comparison of sparse-matrix and stencil solvers]{Compact compute-only comparison of the sparse-matrix and stencil solvers. Values of \(\text{matrix}/\text{stencil}>1\) favour the stencil solver, while values below 1 favour the sparse-matrix solver.}
     \label{tab:bench_compute_compact}
@@ -66,20 +66,20 @@ The compute-only results show that neither realistic solver is uniformly fastest
 \end{table}
 
 
-\section{Live-Display Runtime Comparison}
+\section{Live-display runtime comparison}
 
-When live display is enabled, the total runtime includes both numerical work and rendering overhead. The corresponding results are shown in Figure~\ref{fig:bench_render_runtime}. Compared with the compute-only case, the differences between the sparse-matrix and stencil solvers become smaller.
+When live display is enabled, the total runtime includes both numerical work and rendering overhead. The corresponding results are shown in Fig.~\ref{fig:bench_render_runtime}. Compared with the compute-only case, the differences between the sparse-matrix and stencil solvers become smaller.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.82\textwidth]{figures/render_runtime_loglog.png}
     \caption{Runtime benchmark with live display enabled.}
     \label{fig:bench_render_runtime}
 \end{figure}
 
-The achieved median frame rate is shown in Figure~\ref{fig:bench_fps}. This gives a more direct view of interactive performance.
+The achieved median frame rate is shown in Fig.~\ref{fig:bench_fps}. This gives a more direct view of interactive performance.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.78\textwidth]{figures/fps_render.png}
     \caption{Median frame rate in the live-display benchmark.}
@@ -88,7 +88,7 @@ The achieved median frame rate is shown in Figure~\ref{fig:bench_fps}. This give
 
 Table~\ref{tab:bench_render_compact} summarizes both the live-display runtime and the median frame rate. The same general pattern appears in both measures: the stencil solver is slightly better at \(32\times32\), \(128\times128\), and \(256\times256\), while the sparse-matrix solver is slightly better at \(64\times64\) and \(512\times512\).
 
-\begin{table}[H]
+\begin{table}[htbp]
     \centering
     \caption{Compact live-display comparison of the sparse-matrix and stencil solvers.}
     \label{tab:bench_render_compact}
@@ -111,11 +111,11 @@ Table~\ref{tab:bench_render_compact} summarizes both the live-display runtime an
 
 Thus, interactive use does not overturn the basic comparison: both realistic solvers remain close in runtime, and neither dominates absolutely over the whole grid range.
 
-\section{Memory Footprint Comparison}
+\section{Memory footprint comparison}
 
-The measured memory footprint is shown in Figure~\ref{fig:bench_memory_measured}. This figure provides one of the clearest distinctions between the solver realizations. The dense solver grows extremely rapidly and is already impractical at moderate grid sizes. More importantly, the sparse-matrix solver uses much more memory than the stencil solver over the entire tested range.
+The measured memory footprint is shown in Fig.~\ref{fig:bench_memory_measured}. This figure provides one of the clearest distinctions between the solver realizations. The dense solver grows extremely rapidly and is already impractical at moderate grid sizes. More importantly, the sparse-matrix solver uses much more memory than the stencil solver over the entire tested range.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.82\textwidth]{figures/memory_measured_loglog.png}
     \caption{Measured memory footprint of the solver realizations.}
@@ -124,7 +124,7 @@ The measured memory footprint is shown in Figure~\ref{fig:bench_memory_measured}
 
 Table~\ref{tab:bench_memory_compact} summarizes the measured memory and the relative discrepancy between predicted and measured memory. The memory ratio \(\text{matrix}/\text{stencil}\) grows from about 4.3 on the smallest grid to about 7.5 on the largest tested grid. For the larger grids, the stencil solver also stays much closer to the predicted memory requirement.
 
-\begin{table}[H]
+\begin{table}[htbp]
     \centering
     \caption{Measured memory comparison and prediction discrepancy for the sparse-matrix and stencil solvers.}
     \label{tab:bench_memory_compact}
@@ -147,20 +147,20 @@ Table~\ref{tab:bench_memory_compact} summarizes the measured memory and the rela
 
 The memory results are therefore more one-sided than the runtime results: in all realistic cases, the stencil solver is much more memory-efficient.
 
-\section{Scaling and Interpretation of Results}
+\section{Scaling and interpretation of results}
 
-A compact summary of the matrix-to-stencil comparison is given in Figure~\ref{fig:bench_ratio}. The compute-only ratio, the live-display ratio, and the measured-memory ratio are plotted together. This figure shows that the runtime advantage changes with grid size, but the memory advantage consistently remains with the stencil solver.
+A compact summary of the matrix-to-stencil comparison is given in Fig.~\ref{fig:bench_ratio}. The compute-only ratio, the live-display ratio, and the measured-memory ratio are plotted together. This figure shows that the runtime advantage changes with grid size, but the memory advantage consistently remains with the stencil solver.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.82\textwidth]{figures/matrix_to_stencil_ratio.png}
     \caption{Matrix-to-stencil ratios for compute-only runtime, live-display runtime, and measured memory. Values above 1 favour stencil for runtime ratios and indicate higher matrix memory for the memory ratio.}
     \label{fig:bench_ratio}
 \end{figure}
 
-To assess how reliably the memory behaviour follows the implementation model, Figure~\ref{fig:bench_memory_error} shows the relative discrepancy between predicted and measured memory. On the larger grids, the stencil solver stays much closer to the predicted memory requirement, whereas the sparse-matrix solver keeps a noticeably larger discrepancy.
+To assess how reliably the memory behaviour follows the implementation model, Fig.~\ref{fig:bench_memory_error} shows the relative discrepancy between predicted and measured memory. On the larger grids, the stencil solver stays much closer to the predicted memory requirement, whereas the sparse-matrix solver keeps a noticeably larger discrepancy.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.82\textwidth]{figures/memory_prediction_error.png}
     \caption{Relative discrepancy between predicted and measured memory for the sparse-matrix and stencil solvers.}
@@ -169,7 +169,7 @@ To assess how reliably the memory behaviour follows the implementation model, Fi
 
 Table~\ref{tab:bench_interpretation_summary} combines the most useful benchmark indicators for the realistic solver pair. It shows clearly that the runtime comparison changes with grid size, whereas the memory comparison consistently favours the stencil implementation.
 
-\begin{table}[H]
+\begin{table}[htbp]
     \centering
     \caption{Combined benchmark indicators for the sparse-matrix and stencil solvers.}
     \label{tab:bench_interpretation_summary}
@@ -192,7 +192,7 @@ Table~\ref{tab:bench_interpretation_summary} combines the most useful benchmark 
 
 Taken together, the benchmark results lead to three main conclusions. First, the dense solver is not a realistic option beyond small reference cases. Second, the sparse-matrix and stencil solvers are both competitive in runtime, and neither is uniformly fastest on every grid. Third, memory behaviour clearly favours the stencil solver, especially on the larger grids that are most relevant for realistic simulations.
 
-\section{Selection of the Recommended Default Solver}
+\section{Selection of the recommended default solver}
 
 The final recommended default solver for this project is the stencil-based solver. This recommendation is based on the overall benchmark results of the previous sections. The stencil solver is not always the fastest in absolute runtime, but it remains competitive in both compute-only and live-display execution, while using far less memory than the sparse-matrix solver. In addition, for the larger grids, its measured memory stays much closer to the predicted memory requirement. This makes the stencil implementation more predictable and more suitable for scaling to larger and more complex problems.
 
