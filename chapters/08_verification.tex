@@ -1,7 +1,7 @@
 \chapter{Testing for Verification}
 \label{chap:verification}
 
-\section{Verification Strategy}
+\section{Verification strategy}
 \label{sec:verification_strategy}
 
 This chapter documents the test cases used to verify the correctness and consistency of the implemented Gray--Scott solver. The focus is on \emph{verification}, i.e.\ checking whether the numerical methods and their implementation solve the intended discrete problem correctly. In accordance with the PPP guideline, the chapter therefore emphasizes reproducible test cases with clearly defined aims, setups, execution procedures, expected results, and obtained results.
@@ -15,7 +15,7 @@ Overall, the chapter is designed to move from rigorous numerical verification of
 \section{Detailed Verification Test Cases}
 \label{sec:verification_detailed_cases}
 
-\subsection{Test Case 1: MMS Operator Convergence of the Discrete Laplacian}
+\subsection{Test Case 1: MMS operator convergence of the discrete Laplacian}
 \label{sec:verification_testcase_mms_operator}
 
 \paragraph{Aim.}
@@ -77,7 +77,7 @@ For a smooth periodic solution on a uniform grid, the standard five-point finite
 As a consequence, halving the grid spacing should reduce the error by approximately a factor of four. On a log--log plot of error versus \(h\), the measured slope should be close to \(2\).
 
 \paragraph{Obtained result.}
-The test produced the error values listed in Table~\ref{tab:mms_operator_convergence_data}. The corresponding convergence plot is shown in Figure~\ref{fig:mms_operator_convergence}.
+The test produced the error values listed in Table~\ref{tab:mms_operator_convergence_data}. The corresponding convergence plot is shown in Fig.~\ref{fig:mms_operator_convergence}.
 
 \begin{table}[htbp]
 \centering
@@ -114,7 +114,7 @@ The \(u\)- and \(v\)-errors are identical in this test because both manufactured
 \label{fig:mms_operator_convergence}
 \end{figure}
 
-\subsection{Test Case 2: Temporal Convergence of the Explicit Euler Scheme}
+\subsection{Test Case 2: Temporal convergence of the explicit Euler scheme}
 \label{sec:verification_testcase_timestep_convergence}
 
 \paragraph{Aim.}
@@ -186,7 +186,7 @@ p = \frac{\log(d_{12}/d_{24})}{\log 2}
 should therefore be close to \(1\). In addition, the finer-step difference \(d_{24}\) should be smaller than the coarser-step difference \(d_{12}\).
 
 \paragraph{Obtained result.}
-The measured results are listed in Table~\ref{tab:timestep_convergence_data}, and the \(L^2\)-based refinement plot is shown in Figure~\ref{fig:timestep_convergence}. The numerical results are
+The measured results are listed in Table~\ref{tab:timestep_convergence_data}, and the \(L^2\)-based refinement plot is shown in Fig.~\ref{fig:timestep_convergence}. The numerical results are
 \[
 d_{12}^{L^2} = 3.706\times 10^{-5}, \qquad
 d_{24}^{L^2} = 1.851\times 10^{-5}, \qquad
@@ -231,7 +231,7 @@ Therefore, the test confirms that the implemented time-integration scheme behave
 \end{figure}
 
 
-\subsection{Test Case 3: Verification of Boundary Condition Enforcement}
+\subsection{Test Case 3: Verification of boundary-condition enforcement}
 \label{sec:verification_testcase_boundary_conditions}
 
 \paragraph{Aim.}
@@ -324,7 +324,7 @@ For the mixed long-time test, the left Dirichlet boundary should remain fixed at
 \begin{itemize}
     \item boundary errors at or near machine precision,
     \item no \texttt{NaN} or \texttt{Inf} values,
-    \item nonzero interior change change,
+    \item nonzero interior change,
     \item and identical qualitative behavior for \texttt{matrix}, \texttt{stencil}, and \texttt{full} modes.
 \end{itemize}
 
@@ -366,7 +366,7 @@ Mode & maxErr \(u\) & maxErr \(v\) \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]
+\begin{table}[htbp]
 \centering
 \caption{Neumann boundary-condition verification results for all diffusion modes.}
 \label{tab:bc_neumann_verification}
@@ -381,7 +381,7 @@ Mode & maxErr \(u\) & maxErr \(v\) \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]
+\begin{table}[htbp]
 \centering
 \small
 \setlength{\tabcolsep}{4pt}
@@ -408,7 +408,7 @@ Mode
 Overall, this test case confirms that the boundary-condition treatment is not only mathematically correct at the discrete level, but also numerically robust during time stepping and consistent across all solver variants used in the project.
 
 
-\subsection{Test Case 4: Matrix--Stencil Equivalence of the Diffusion Operator}
+\subsection{Test Case 4: Matrix--stencil equivalence of the diffusion operator}
 \label{sec:verification_testcase_laplacian_equivalence}
 
 \paragraph{Aim.}
@@ -508,7 +508,7 @@ Grid & Trial & Relative error & Max absolute difference \\
 \end{table}
 
 
-\subsection{Test Case 5: End-to-End Equivalence of Matrix and Stencil Solver Modes}
+\subsection{Test Case 5: End-to-end equivalence of matrix and stencil solver modes}
 \label{sec:verification_testcase_solver_equivalence}
 
 \paragraph{Aim.}
@@ -623,7 +623,7 @@ Thus, the final solutions produced by the two solver modes are numerically indis
 This result shows that the stencil-based and matrix-based implementations remain consistent not only when applying the Laplacian to a test vector, but also when embedded in the full Gray--Scott time integration process.
 
 
-\subsection{Test Case 6: GUI and Non-GUI Consistency}
+\subsection{Test Case 6: GUI and non-GUI consistency}
 \label{sec:verification_testcase_gui_consistency}
 
 \paragraph{Aim.}
@@ -743,7 +743,7 @@ Hence, this test confirms that the GUI layer does not modify the mathematical or
 \label{fig:gui_nongui_consistency}
 \end{figure}
 
-\subsection{Test Case 7: Gray--Scott Grid Refinement Test}
+\subsection{Test Case 7: Gray--Scott grid refinement test}
 \label{sec:verification_testcase_grid_refinement}
 
 \paragraph{Aim.}
@@ -906,7 +906,7 @@ These values are now very close to the theoretical value \(2\). This behavior is
 It is important to interpret this result correctly. It demonstrates that, for a smooth grid-independent initial condition and a sufficiently controlled time-step refinement strategy, the computed solutions converge toward the fine-grid reference with a rate consistent with second-order spatial accuracy.
 
 \paragraph{Interpretation.}
-This test case is useful not only because of the final numerical result, but also because it documents an important verification lesson. The first formulation produced monotonic error reduction but only moderate rates, which initially suggested that phase-sensitive nonlinear dynamics might limit the refinement study. A more careful analysis showed that the dominant problem was actually the test design itself: the initial condition changed with the grid. Once the initialization was reformulated in a grid-independent way and the random perturbation was removed, the expected second-order behavior became visible.
+This test case is useful not only because of the final numerical result, but also because it documents an important verification lesson. The first formulation produced monotonic error reduction but observed rates below the ideal value, which initially suggested that phase-sensitive nonlinear dynamics might limit the refinement study. A more careful analysis showed that the dominant problem was actually the test design itself: the initial condition changed with the grid. Once the initialization was reformulated in a grid-independent way and the random perturbation was removed, the expected second-order behavior became visible.
 
 This progression is important for the overall verification strategy of the project. It shows that the solver was not merely producing plausible pictures; rather, the refinement behavior was examined critically, the source of the inconsistency was identified, and the test was redesigned until it measured the intended property in a technically meaningful way.
 
@@ -919,7 +919,7 @@ Figure~\ref{fig:grayscott_grid_refinement} shows the final log--log refinement p
 \label{fig:grayscott_grid_refinement}
 \end{figure}
 
-\subsection{Test Case 8: Explicit Euler Stability Limit}
+\subsection{Test Case 8: Explicit Euler stability limit}
 \label{sec:verification_testcase_explicit_stability_limit}
 
 \paragraph{Aim.}
@@ -1072,7 +1072,7 @@ Moreover, the maximum relative error between the complete measured norm history 
 9.415 \times 10^{-13}.
 \]
 
-\begin{table}[H]
+\begin{table}[htbp]
 \centering
 \caption{Explicit Euler stability-limit test results for the diffusion subcase on the \(128\times128\) periodic grid.}
 \label{tab:explicit_stability_limit}
@@ -1091,19 +1091,19 @@ Figure~\ref{fig:explicit_stability_limit} shows the normalized perturbation \(L^
 
 Hence, this test confirms that the implementation reproduces the correct stability boundary of the explicit Euler method. It verifies not only the qualitative behavior below, at, and above the critical time step, but also the quantitative amplification factors predicted by theory.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.82\textwidth]{figures/verification/explicit_stability_limit.png}
 \caption{Explicit Euler stability-limit test for the diffusion subcase on the \(128\times128\) periodic grid. Below the critical time step the perturbation decays, at the critical value it is preserved, and above the critical value it grows, in exact agreement with the theoretical amplification factors.}
 \label{fig:explicit_stability_limit}
 \end{figure}
 
-\section{Supplementary Verification Checks}
+\section{Supplementary verification checks}
 \label{sec:verification_supplementary}
 
 In addition to the detailed test cases above, several smaller checks were carried out to support the overall verification strategy. These tests are useful because they isolate specific mathematical or implementation properties, even if they do not require a full standalone discussion.
 
-\subsection{Constant-Field Laplacian Null Test}
+\subsection{Constant-field Laplacian null test}
 \label{sec:verification_constant_field}
 
 As an additional structural check, the discrete Laplacian was applied to a constant field. For a constant function, the continuous Laplacian is identically zero, and the same property is expected from the discrete operator. Therefore, this test serves as a simple but useful sanity check of the assembled diffusion operator.
@@ -1125,7 +1125,7 @@ with
 \]
 Thus, the discrete Laplacian annihilates a constant field exactly in this case. This confirms that the operator satisfies an important basic consistency property and provides additional evidence that the diffusion discretization is assembled correctly.
 
-\subsection{Symmetry Check of the Discrete Laplacian Matrix}
+\subsection{Symmetry check of the discrete Laplacian matrix}
 \label{sec:verification_laplacian_symmetry}
 
 A further structural verification step checks the symmetry of the assembled discrete Laplacian matrix. For the periodic finite-difference diffusion operator used in this project, the Laplacian matrix is expected to be symmetric under the tested setup. This property is important because it supports the correctness of the stencil-to-matrix assembly and helps detect indexing or coefficient-placement errors.
@@ -1145,7 +1145,7 @@ and the reported symmetry defect was
 \]
 Therefore, the assembled Laplacian matrix is exactly symmetric in this case. This result is fully consistent with the expected structure of the periodic diffusion operator and provides additional evidence that the matrix assembly is implemented correctly.
 
-\subsection{End-to-End MMS Consistency Check}
+\subsection{End-to-end MMS consistency check}
 \label{sec:verification_mms_endtoend}
 
 As a supplementary verification step, the full solver was tested with a manufactured-solution setup. In contrast to the operator-only MMS test of Test Case~1, this check verifies the complete time-dependent workflow, including reaction, diffusion, source-term handling, and explicit Euler time stepping. It is therefore useful as supporting end-to-end verification evidence for the implemented numerical model.
@@ -1180,7 +1180,7 @@ and the reported final \(L^2\) errors were
 
 These errors are small for the chosen grid and time-step size. They are consistent with a correctly implemented manufactured-solution workflow. The generated error figure is stored in the local output folder of \texttt{tests/supplementary\_checks/}. Figure~\ref{fig:mms_endtoend_errV} shows the spatial error field for \(v\) at the final time. The smooth, structured pattern is typical of discretization error and does not indicate instability or implementation failure.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.72\textwidth]{figures/verification/mms_endtoend_errV.png}
 \caption{Spatial error field of the manufactured-solution end-to-end test for \(v\) at \(T=1\), with \(N_x=N_y=128\) and \(\Delta t=0.01\).}
@@ -1189,7 +1189,7 @@ These errors are small for the chosen grid and time-step size. They are consiste
 
 Overall, this supplementary test provides additional evidence that the complete solver reproduces the manufactured solution with small final errors when the corresponding source terms are included.
 
-\subsection{Time-Step Halving Smoke Test}
+\subsection{Time-step halving smoke test}
 \label{sec:verification_timestep_halving_smoke}
 
 As a quick supplementary consistency check, a simpler time-step halving test was also performed. In contrast to the full temporal convergence study of Test Case~2, this test is not intended as a rigorous order-verification procedure. Instead, it serves as a compact sanity check showing that the numerical solution changes in the expected direction when the time step is refined.
@@ -1234,14 +1234,14 @@ The finer-step differences are smaller than the coarser-step differences in both
 Moreover, the reduction is approximately by a factor of two, which is consistent with the expected first-order behavior of the explicit Euler method under time-step halving.
 
 
-\section{Validation-Oriented Pattern Sanity Check}
+\section{Validation-oriented pattern sanity check}
 \label{sec:verification_pattern_sanity}
 
 In addition to the formal verification tests presented earlier in this chapter, a long-time Gray--Scott pattern study was carried out as a \emph{validation-oriented sanity check}. The role of this section is intentionally different from that of the preceding test cases. The earlier tests were designed to verify numerical correctness in a strict sense, for example through manufactured solutions, convergence measurements, operator equivalence, boundary-condition enforcement, and consistency checks between different execution paths. By contrast, the present study asks whether the implemented solver also reproduces the kind of plausible and morphologically distinct pattern classes that are commonly associated with the Gray--Scott model in the literature.
 
 The Gray--Scott system is well known for producing a rich variety of self-organized structures depending on the feed and kill parameters. Pearson's classical study established the basic pattern-forming context of the model, while later classification work organized a broader range of visually distinct regimes using labels such as \texttt{alpha}, \texttt{epsilon}, \texttt{kappa}, and \texttt{theta} \cite{pearson1993,munafo_gray_scott_classes}. A modern tutorial-style analysis of the Gray--Scott model and its pattern behavior is also given in \cite{gandy2022}. The present test is therefore not intended to replace the formal verification evidence, but rather to complement it by showing that the final implementation produces stable and qualitatively reasonable long-time dynamics for standard Pearson-type parameter choices.
 
-\subsection{Test Case 9: Pearson-Type Pattern Sanity Check}
+\subsection{Test Case 9: Pearson-type pattern sanity check}
 \label{sec:verification_testcase_pearson}
 
 \paragraph{Aim.}
@@ -1330,49 +1330,49 @@ Each of the four parameter sets was simulated over the full
 200000
 \]
 time steps, and all requested snapshots were saved.
-The representative \(U\)-field snapshots at \(t=100000\), shown in Figures~\ref{fig:pearson_alpha_snapshot}--\ref{fig:pearson_theta_snapshot}, demonstrate that the implemented solver generates clearly different and visually plausible pattern morphologies for the four tested parameter sets.
+The representative \(U\)-field snapshots at \(t=100000\), shown in Figs.~\ref{fig:pearson_alpha_snapshot}--\ref{fig:pearson_theta_snapshot}, demonstrate that the implemented solver generates clearly different and visually plausible pattern morphologies for the four tested parameter sets.
 
-The \texttt{alpha} case in Figure~\ref{fig:pearson_alpha_snapshot} is dominated by separated spot-like structures embedded in a mostly high-\(U\) background. The spots are irregularly distributed, but they remain localized and well formed. The image does not suggest numerical breakup, grid-aligned artifacts, or unstable oscillatory contamination. Instead, it shows a coherent spot-dominated regime consistent with the expected Gray--Scott behavior for this type of parameter choice.
+The \texttt{alpha} case in Fig.~\ref{fig:pearson_alpha_snapshot} is dominated by separated spot-like structures embedded in a mostly high-\(U\) background. The spots are irregularly distributed, but they remain localized and well formed. The image does not suggest numerical breakup, grid-aligned artifacts, or unstable oscillatory contamination. Instead, it shows a coherent spot-dominated regime consistent with the expected Gray--Scott behavior for this type of parameter choice.
 
-The \texttt{epsilon} case in Figure~\ref{fig:pearson_epsilon_snapshot} also belongs to a spot-dominated family, but the pattern is markedly denser and more crowded than in the \texttt{alpha} case. Small spot-like depressions in the \(U\)-field are distributed much more uniformly across the domain, producing a texture that is finer and more tightly packed. This visual difference is important because it shows that the solver is not merely reproducing one generic spot pattern for all parameter values; rather, it responds sensitively to the change in \((F,k)\) and produces a distinctly different morphological regime.
+The \texttt{epsilon} case in Fig.~\ref{fig:pearson_epsilon_snapshot} also belongs to a spot-dominated family, but the pattern is markedly denser and more crowded than in the \texttt{alpha} case. Small spot-like depressions in the \(U\)-field are distributed much more uniformly across the domain, producing a texture that is finer and more tightly packed. This visual difference is important because it shows that the solver is not merely reproducing one generic spot pattern for all parameter values; rather, it responds sensitively to the change in \((F,k)\) and produces a distinctly different morphological regime.
 
-By contrast, the \texttt{kappa} case in Figure~\ref{fig:pearson_kappa_snapshot} is no longer spot-dominated. Instead, the solution organizes into broad, elongated, stripe-like structures with a labyrinthine appearance. The stripes are smooth and continuous over long distances, and they form an interconnected network rather than isolated islands. This is a qualitatively different regime from the previous two cases and is visually consistent with the classic Gray--Scott transition from spot patterns to stripe or maze-like patterns under different parameter settings.
+By contrast, the \texttt{kappa} case in Fig.~\ref{fig:pearson_kappa_snapshot} is no longer spot-dominated. Instead, the solution organizes into broad, elongated, stripe-like structures with a labyrinthine appearance. The stripes are smooth and continuous over long distances, and they form an interconnected network rather than isolated islands. This is a qualitatively different regime from the previous two cases and is visually consistent with the classic Gray--Scott transition from spot patterns to stripe or maze-like patterns under different parameter settings.
 
-The \texttt{theta} case in Figure~\ref{fig:pearson_theta_snapshot} is also labyrinth-like, but it is not identical to \texttt{kappa}. The stripe network is more intricate and locally more curved, and the overall topology appears somewhat more tangled and fine-scaled. Thus, even within the stripe-dominated family, the implementation still distinguishes between parameter sets and produces visibly different structure. This strengthens the interpretation that the solver is capturing meaningful qualitative pattern dependence rather than generating a single repeated texture.
+The \texttt{theta} case in Fig.~\ref{fig:pearson_theta_snapshot} is also labyrinth-like, but it is not identical to \texttt{kappa}. The stripe network is more intricate and locally more curved, and the overall topology appears somewhat more tangled and fine-scaled. Thus, even within the stripe-dominated family, the implementation still distinguishes between parameter sets and produces visibly different structure. This strengthens the interpretation that the solver is capturing meaningful qualitative pattern dependence rather than generating a single repeated texture.
 
 Taken together, these four cases show two important features. First, the runs remain numerically stable and visually clean over a very long integration horizon. Second, the parameter changes lead to clear morphological differentiation between spot-dominated and labyrinth-dominated regimes, with further variation inside each family. This is exactly the kind of application-level behavior expected from a plausible Gray--Scott implementation \cite{pearson1993,munafo_gray_scott_classes}.
 
 At the same time, the interpretation of this test should remain careful. Because no exact reference field is available, the present result does not prove correctness in the same way as the manufactured-solution or convergence-based tests. Its role is supportive: it shows that the implemented model behaves plausibly, produces stable long-time structures, and reproduces the qualitative diversity associated with Pearson-type Gray--Scott dynamics.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth]{figures/verification/pattern_sanity/alpha_t100000_U.png}
 \caption{Pearson \texttt{alpha} case: representative \(U\)-field snapshot at \(t=100000\). The morphology is dominated by separated spot-like structures in a mostly high-\(U\) background.}
 \label{fig:pearson_alpha_snapshot}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth]{figures/verification/pattern_sanity/epsilon_t100000_U.png}
 \caption{Pearson \texttt{epsilon} case: representative \(U\)-field snapshot at \(t=100000\). Compared with \texttt{alpha}, the pattern is denser and more uniformly populated by small spot-like structures.}
 \label{fig:pearson_epsilon_snapshot}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth]{figures/verification/pattern_sanity/kappa_t100000_U.png}
 \caption{Pearson \texttt{kappa} case: representative \(U\)-field snapshot at \(t=100000\). The pattern exhibits a broad labyrinth-like stripe morphology rather than isolated spots.}
 \label{fig:pearson_kappa_snapshot}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth]{figures/verification/pattern_sanity/theta_t100000_U.png}
 \caption{Pearson \texttt{theta} case: representative \(U\)-field snapshot at \(t=100000\). The pattern is also labyrinth-like, but with a more intricate and locally curved stripe network than in the \texttt{kappa} case.}
 \label{fig:pearson_theta_snapshot}
 \end{figure}
 
-\section{Verification Summary}
+\section{Verification summary}
 \label{sec:verification_summary}
 
 Overall, the verification results show that the implemented Gray--Scott solver behaves consistently with the expected numerical properties of the model and its discretization. The manufactured-solution operator test confirmed second-order spatial accuracy of the discrete Laplacian, while the time-step refinement study confirmed the expected first-order behavior of the explicit Euler method. The boundary-condition tests verified robust enforcement of Dirichlet and Neumann conditions, and the matrix--stencil comparison tests showed that the different diffusion implementations are equivalent both at the operator level and in full end-to-end simulations. In addition, the GUI and non-GUI comparison demonstrated that the graphical interface does not alter the numerical results. The supplementary checks further supported the structural correctness and internal consistency of the implementation. Taken together, these results provide strong verification evidence for the numerical core of the project, while the Pearson-type pattern study offers an additional validation-oriented sanity check at the application level.
