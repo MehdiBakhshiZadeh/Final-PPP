@@ -5,6 +5,9 @@
 
 The Gray--Scott project is designed to be executed directly from the root folder of the repository. The main requirement is a working MATLAB installation. In addition, MATLAB App Designer support is needed for the graphical user interface, because the GUI is stored as an \texttt{.mlapp} file. No external datasets, third-party libraries, or user-created input files are required for a standard simulation run. The program generates its own initial conditions internally and writes the produced outputs automatically to result folders.
 
+\paragraph{MATLAB version note.}
+The project was developed and tested with MATLAB 2025b. Older MATLAB versions may still run parts of the program, but compatibility is not guaranteed. In particular, GUI theme-related properties may cause exceptions in older releases, and possible incompatibilities in other parts of the program cannot be excluded. For reliable execution, MATLAB 2025b or newer is recommended.
+
 For normal use, the most important files and folders are:
 
 \begin{itemize}
@@ -31,6 +34,20 @@ The project does not use external parameter files such as JSON, TXT, CSV, or XML
 In the final project version, the stencil-based diffusion solver is the default choice for normal execution. The matrix-based and full-array variants remain available mainly for verification and benchmarking.
 
 The following sections explain how to use the GUI, how to run the model without the GUI, how to execute the standard tests and the benchmark script, and where the generated outputs are stored.
+
+\section{Installation}
+\label{sec:manual_installation}
+
+The project is provided as a normal folder-based MATLAB project and is intended to be used directly after unpacking. No separate installer is required. To prepare the program for use, unzip the project folder, place it in a suitable location, and open MATLAB.
+
+Two practical ways of starting the project are supported:
+
+\begin{enumerate}
+    \item \textbf{Start from the project root folder.} Navigate in MATLAB to the root folder of the unpacked project and run one of the starter scripts such as \texttt{run\_gui} or \texttt{run\_model\_class}.
+    \item \textbf{Make the project root callable from MATLAB.} If the user does not want to work directly from the project root, it is sufficient to add the project root folder, which contains the starter scripts, to the MATLAB path and then call \texttt{run\_gui} or \texttt{run\_model\_class} from there. The starter scripts set the required paths to the numerical kernel automatically.
+\end{enumerate}
+
+The program should be regarded as a standalone MATLAB project, not as an installable MATLAB app. In particular, packaging it through the MATLAB app installer is not the intended usage mode of the final submission, because such an installation workflow may not reproduce the required internal paths reliably on another system.
 
 \section{How to Run the GUI}
 \label{sec:manual_gui}
@@ -78,6 +95,26 @@ The GUI also supports model storage through the \texttt{File} menu. The entry \t
 As a simple example, suppose that the user wants to inspect a spot-forming regime visually. A practical procedure is to start the GUI, select the \texttt{V} field, choose an appropriate spot-like preset from the menu, and press \texttt{Run}. If the generated pattern is interesting, recording can be activated before the next run so that the temporal evolution is saved automatically. If the same pattern should then be compared under a different boundary condition, the boundary-condition type can be changed and the model can be started again from the initial state.
 
 The GUI is therefore best suited for exploratory work, visual comparison of parameter choices, video recording, and demonstration of the model during presentations. For reproducible scripted runs with explicit parameter editing, the non-GUI workflow is more appropriate.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=\textwidth]{figures/manual_gui_annotated_no_legend.png}
+    \caption{Annotated screenshot of the final GUI during a typical startup state. The numbered callouts indicate the main elements used during interactive operation.}
+    \label{fig:manual_gui_overview}
+\end{figure}
+
+Figure~\ref{fig:manual_gui_overview} shows the practical arrangement of the two-window GUI during normal use. The upper window is the separate MATLAB plot window, while the lower window is the controller interface. This layout allows the user to keep simulation control and visualization separated during interactive work. In addition, the separate plot window gives direct access to MATLAB's standard figure tools, including the usual save-figure functionality.
+
+The numbered elements in Figure~\ref{fig:manual_gui_overview} have the following meaning:
+
+\begin{enumerate}
+    \item \textbf{Plot window:} displays the currently selected solution field during initialization and simulation.
+    \item \textbf{Reaction-parameter sliders:} used to adjust the Gray--Scott parameters \(F\) and \(k\) interactively.
+    \item \textbf{Boundary-condition controls:} used to choose between periodic, Neumann, and Dirichlet boundary conditions.
+    \item \textbf{Run-control buttons:} used to reset, restart, record, pause, and run the simulation.
+    \item \textbf{Field and video settings:} used to choose the displayed field and the recording settings.
+    \item \textbf{Status bar:} shows the current simulation state, including time step, displayed field, boundary-condition mode, parameter values, and run status.
+\end{enumerate}
 
 \section{How to Run the Model Without the GUI}
 \label{sec:manual_nongui}

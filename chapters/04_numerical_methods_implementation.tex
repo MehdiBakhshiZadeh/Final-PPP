@@ -583,7 +583,7 @@ The final GUI follows this separated architecture. A controller window is used f
 
 The final GUI is organized as two cooperating windows: a controller window for user interaction and a separate plot window for graphical output. This separation was chosen deliberately in order to keep the interface clear and to avoid overloading a single window with too many responsibilities. The controller is responsible for receiving user input and managing the simulation state, whereas the plot window is dedicated to visualizing the computed solution field.
 
-The controller window is shown in Figure~\ref{fig:gui_final_controller}. It combines the most important simulation controls in one place. The interface includes parameter sliders for the feed and kill rates, editable diffusion coefficients, boundary-condition selection, and the main execution buttons for running, pausing, restarting, resetting, and recording the simulation. In addition, the user can choose which field is displayed, select a video format for export, define the recording frame rate, and monitor the current simulation state through the status display. The equations are also shown directly in the interface so that the GUI remains closely connected to the underlying mathematical model.
+The controller window is shown in Figure~\ref{fig:gui_final_controller}. It combines the most important simulation controls in one place. The interface includes parameter sliders for the feed and kill rates, displayed diffusion coefficients, boundary-condition selection, and the main execution buttons for running, pausing, restarting, resetting, and recording the simulation. In addition, the user can choose which field is displayed, select a video format for export, define the recording frame rate, and monitor the current simulation state through the status display. The equations are also shown directly in the interface so that the GUI remains closely connected to the underlying mathematical model.
 
 \begin{figure}[H]
     \centering
@@ -601,16 +601,16 @@ The visualization itself is handled in a separate plot window, shown in Figure~\
     \label{fig:gui_final_plotter}
 \end{figure}
 
-Even at a high level, the GUI is more than a simple collection of buttons and sliders. Different user actions must trigger different updates in a coordinated way. Menu actions, parameter changes, plotting options, execution commands, boundary-condition selection, and recording settings all need to interact consistently with the current model state. The overall interaction logic is illustrated by the information-flow diagram in Figure~\ref{fig:gui_information_flow}. This figure emphasizes that building a GUI for a scientific simulation involves structured communication between many interface elements rather than only arranging visual components on the screen.
+Even at a high level, the GUI is more than a simple collection of buttons and sliders. User actions such as moving a slider, choosing a preset, loading a saved model, starting or pausing a run, or enabling recording must trigger coordinated updates in several parts of the program. In particular, GUI controls, the shared model state, and the visualization components must remain synchronized during interactive use. The overall interaction logic is illustrated by the information-flow diagram in Figure~\ref{fig:gui_information_flow}. This makes clear that an important part of the programming effort was invested in the interaction logic behind the interface, not only in the visual arrangement of GUI elements.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.92\textwidth]{figures/InformationFlowGUI.png}
-    \caption{High-level information flow between major GUI elements and user actions.}
+    \caption{Information flow between the main GUI elements, the shared model state, and the visualization components.}
     \label{fig:gui_information_flow}
 \end{figure}
 
-In this way, the final GUI provides an interface that is practical for interactive use while remaining closely connected to the numerical model. The chosen architecture makes the application easier to use, easier to maintain, and better suited to the workflow of repeated simulation, visualization, and optional recording.
+In this way, the final GUI provides an interface that is practical for interactive use while remaining closely connected to the numerical model. The two-window architecture not only reduces visual clutter, but also gives the user direct access to MATLAB's standard figure tools in the separate plot window, including the save-figure functionality. This makes the application easier to use, easier to maintain, and well suited to repeated simulation, visualization, and optional recording.
 
 \subsection{Integration with the Simulation Core}
 \label{subsec:gui_integration}
