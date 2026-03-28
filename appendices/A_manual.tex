@@ -1,6 +1,6 @@
 \chapter{Manual}
 
-\section{Requirements, Project Layout, and Execution Modes}
+\section{Requirements, project layout, and execution modes}
 \label{sec:manual_requirements}
 
 The Gray--Scott project is designed to be executed directly from the root folder of the repository. The main requirement is a working MATLAB installation. In addition, MATLAB App Designer support is needed for the graphical user interface, because the GUI is stored as an \texttt{.mlapp} file. No external datasets, third-party libraries, or user-created input files are required for a standard simulation run. The program generates its own initial conditions internally and writes the produced outputs automatically to result folders.
@@ -23,10 +23,11 @@ From the user point of view, the project provides four practical execution modes
 
 \begin{enumerate}
     \item \textbf{GUI mode:} interactive use through the App Designer interface for manual exploration of the model.
-    \item \textbf{Non-GUI mode:} scripted execution through \texttt{run\_model\_class.m} for reproducible runs.
-    \item \textbf{Test mode:} execution of the main verification suite. The entry script is\\
-     \texttt{tests/run\_all\_tests.m}.
-    \item \textbf{Benchmark mode:} performance comparison of solver variants. The entry script is \texttt{tests/benchmark\_solvers.m}.
+    \item \textbf{Non-GUI mode:} scripted execution through \path{run_model_class.m} for reproducible runs.
+    \item \textbf{Test mode:} execution of the main verification suite. The entry script is \path{tests/run_all_tests.m}.
+    \item \textbf{Benchmark mode:} performance comparison of solver variants. The main benchmark script is in the benchmark folder:
+    
+    \path{tests/benchmark_solver_performance/benchmark_solvers.m}
 \end{enumerate}
 
 The project does not use external parameter files such as JSON, TXT, CSV, or XML files for standard runs. Instead, the simulation settings are stored in a MATLAB structure named \texttt{p}. In non-GUI mode, this structure is created directly in the launcher script. In GUI mode, the same parameter structure is managed internally through the interface controls. Thus, the effective input format of the program is a MATLAB parameter structure rather than a separate configuration file.
@@ -38,7 +39,7 @@ The following sections explain how to use the GUI, how to run the model without 
 \section{Installation}
 \label{sec:manual_installation}
 
-The project is provided as a normal folder-based MATLAB project and is intended to be used directly after unpacking. No separate installer is required. To prepare the program for use, unzip the project folder, place it in a suitable location, and open MATLAB.
+The project is provided as a standard folder-based MATLAB project and is intended to be used directly after unpacking. No separate installer is required. To prepare the program for use, unzip the project folder, place it in a suitable location, and open MATLAB.
 
 Two practical ways of starting the project are supported:
 
@@ -49,7 +50,7 @@ Two practical ways of starting the project are supported:
 
 The program should be regarded as a standalone MATLAB project, not as an installable MATLAB app. In particular, packaging it through the MATLAB app installer is not the intended usage mode of the final submission, because such an installation workflow may not reproduce the required internal paths reliably on another system.
 
-\section{How to Run the GUI}
+\section{How to run the GUI}
 \label{sec:manual_gui}
 
 The graphical user interface is the most convenient execution mode for interactive exploration of the Gray--Scott model. To start it, open the project root folder in MATLAB and run
@@ -96,7 +97,7 @@ As a simple example, suppose that the user wants to inspect a spot-forming regim
 
 The GUI is therefore best suited for exploratory work, visual comparison of parameter choices, video recording, and demonstration of the model during presentations. For reproducible scripted runs with explicit parameter editing, the non-GUI workflow is more appropriate.
 
-\begin{figure}[ht!]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{figures/manual_gui_annotated_no_legend.png}
     \caption{Annotated screenshot of the final GUI during a typical startup state. The numbered callouts indicate the main elements used during interactive operation.}
@@ -105,7 +106,7 @@ The GUI is therefore best suited for exploratory work, visual comparison of para
 
 Figure~\ref{fig:manual_gui_overview} shows the practical arrangement of the two-window GUI during normal use. The upper window is the separate MATLAB plot window, while the lower window is the controller interface. This layout allows the user to keep simulation control and visualization separated during interactive work. In addition, the separate plot window gives direct access to MATLAB's standard figure tools, including the usual save-figure functionality.
 
-The numbered elements in Figure~\ref{fig:manual_gui_overview} have the following meaning:
+The numbered elements in Fig.~\ref{fig:manual_gui_overview} have the following meaning:
 
 \begin{enumerate}
     \item \textbf{Plot window:} displays the currently selected solution field during initialization and simulation.
@@ -116,7 +117,7 @@ The numbered elements in Figure~\ref{fig:manual_gui_overview} have the following
     \item \textbf{Status bar:} shows the current simulation state, including time step, displayed field, boundary-condition mode, parameter values, and run status.
 \end{enumerate}
 
-\section{How to Run the Model Without the GUI}
+\section{How to run the model without the GUI}
 \label{sec:manual_nongui}
 
 The non-GUI workflow is intended for reproducible scripted simulations. It is the most suitable execution mode when parameter values should be documented explicitly, when a run should be repeated under controlled conditions, or when output files should be generated in an organized run folder.
@@ -246,7 +247,7 @@ p.savePngEvery = 0;
 
 disables intermediate live plotting and intermediate PNG export. The script still saves the final state and exports one final snapshot at the end of the run.
 
-\section{How to Run the Tests}
+\section{How to run the tests}
 \label{sec:manual_tests}
 
 The project contains a structured verification folder for automated checks of the numerical implementation. These tests are intended to confirm that the solver behaves correctly with respect to operator properties, boundary-condition handling, manufactured-solution verification, time-step behavior, and agreement between different diffusion implementations.
@@ -314,7 +315,7 @@ performs a dedicated grid-refinement study. Because it is more expensive than th
 
 \textbf{3. GUI versus non-GUI consistency check}
 
-The folder \texttt{tests/gui\_consistency/} contains a separate workflow to verify that the GUI reproduces the same numerical results as the non-GUI execution path. This check is not part of \texttt{run\_all\_tests}, because it requires a dedicated comparison workflow. The recommended procedure is:
+The folder \texttt{tests/test\_case\_06\_gui\_nongui\_consistency/} contains a separate workflow to verify that the GUI reproduces the same numerical results as the non-GUI execution path. This check is not part of \texttt{run\_all\_tests}, because it requires a dedicated comparison workflow. The recommended procedure is:
 
 \begin{verbatim}
 ref = run_nongui_reference_dump();
@@ -326,7 +327,7 @@ This workflow generates reference dumps, compares intermediate and final states,
 
 For ordinary development and routine verification, the standard call to \texttt{run\_all\_tests} is sufficient and recommended. The standalone scripts should be used only when their specific purpose is needed.
 
-\section{How to Run the Benchmarks}
+\section{How to run the benchmarks}
 \label{sec:manual_benchmarks}
 
 The benchmark scripts are intended for systematic performance comparison of the available diffusion implementations. In the final project version, the main benchmark entry point is the MATLAB function \texttt{benchmark\_solvers()}, which compares the sparse-matrix solver, the stencil-based solver, and the dense/full solver under a fixed benchmark protocol. The benchmark is not a verification test in the strict sense; instead, it measures runtime and memory-related quantities for the different implementations under controlled conditions.
@@ -390,7 +391,7 @@ After the computation finishes, inspect the newest benchmark folder inside \text
 
 The benchmark is designed specifically to compare diffusion implementations under a common numerical setup. The diffusion operators use periodic connectivity internally, while physical boundary conditions such as Dirichlet or Neumann are enforced after each time step rather than being part of the benchmarked operator itself. Therefore, the benchmark should be interpreted as a solver-performance study and not as a comparison of different physical boundary-condition models.
 
-\section{Output Folders and Generated Files}
+\section{Output folders and generated files}
 \label{sec:manual_outputs}
 
 The project writes its generated data automatically into output folders, so the user normally does not need to create result directories manually. Most outputs are stored under the folder \texttt{results/}. The exact files depend on the selected execution mode.
