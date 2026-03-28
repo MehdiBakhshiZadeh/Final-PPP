@@ -1,6 +1,6 @@
-\chapter{Numerical Methods Implementation}
+\chapter{Numerical Methods and Implementation Details}
 
-\section{Overall Numerical Strategy, Computational Grid, and Data Layout}
+\section{Overall numerical strategy, computational grid, and data layout}
 \label{sec:numimpl_overview_grid}
 
 This chapter describes how the Gray--Scott reaction--diffusion model is solved numerically and how the final MATLAB implementation realizes the method in practice. The goal is not only to state the discrete equations, but also to explain how the final code organizes the solver, stores the state variables, applies the diffusion operator, and keeps the different solver variants consistent with each other.
@@ -73,7 +73,7 @@ At the highest level, the simulation state is encapsulated in the class \texttt{
 
 In summary, the final implementation is built around three core ideas: a uniform Cartesian grid on $[0,L_x)\times[0,L_y)$, a column-major data layout consistent with MATLAB's native memory model, and a modular solver architecture that cleanly separates parameter handling, operator realization, and time stepping. These choices are not merely programming preferences; they directly support the numerical method, make the different solver variants comparable, and provide a robust foundation for the more detailed discretization and implementation discussions that follow in the next sections.
 
-\section{Spatial Discretization and the Discrete Laplacian}
+\section{Spatial discretization and the discrete Laplacian}
 \label{sec:numimpl_spatial_laplacian}
 
 After defining the computational grid and the data layout, the next step is the spatial discretization of the diffusion term. In the Gray--Scott system, diffusion acts through the Laplacian operator on both concentration fields,
@@ -113,9 +113,9 @@ Adding these two contributions gives the discrete Laplacian
 \frac{U(j+1,i)-2U(j,i)+U(j-1,i)}{h_y^2}.
 \label{eq:laplacian_5point_numimpl}
 \end{equation}
-This expression corresponds to the standard five-point finite-difference stencil on a two-dimensional Cartesian grid. The local coupling pattern of this operator is shown in Figure~\ref{fig:five_point_stencil}. On a uniform grid, the approximation is second-order accurate in space, provided that the continuous solution is sufficiently smooth. Since the final code also supports rectangular domains with different mesh spacings in the two coordinate directions, the implementation retains the factors $1/h_x^2$ and $1/h_y^2$ separately rather than assuming $h_x=h_y$.
+This expression corresponds to the standard five-point finite-difference stencil on a two-dimensional Cartesian grid. The local coupling pattern of this operator is shown in Fig.~\ref{fig:five_point_stencil}. On a uniform grid, the approximation is second-order accurate in space, provided that the continuous solution is sufficiently smooth. Since the final code also supports rectangular domains with different mesh spacings in the two coordinate directions, the implementation retains the factors $1/h_x^2$ and $1/h_y^2$ separately rather than assuming $h_x=h_y$.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
   \centering
   \begin{tikzpicture}[scale=1.0, line cap=round, line join=round]
     % Nodes
@@ -205,7 +205,7 @@ The project also includes internal checks that support the correctness of the di
 
 In summary, the spatial discretization of diffusion in the final project is based on a standard second-order five-point finite-difference Laplacian on a uniform Cartesian grid. The corresponding discrete operator is realized either as a sparse matrix, a dense matrix, or a matrix-free stencil, but all three forms are algebraically consistent with the same formula. This gives the project both numerical clarity and implementation flexibility: the mathematics remains fixed, while the software can choose the most suitable operator realization for the intended task.
 
-\section{Time Integration and the Full Update Algorithm}
+\section{Time integration and the full update algorithm}
 \label{sec:numimpl_time_update}
 
 After spatial discretization, the Gray--Scott system is reduced to a large coupled system of ordinary differential equations in time. Let $u(t)$ and $v(t)$ denote the vectorized concentration fields after spatial discretization. Then the semi-discrete system can be written in the form
@@ -340,7 +340,7 @@ This sequence reflects the actual structure of the final code and provides a dir
 
 In summary, the time integration in the final project is based on a first-order explicit Euler method applied to the semi-discrete Gray--Scott system. The method is simple, fully transparent, and implemented in a modular way: diffusion, reaction, optional source terms, boundary enforcement, and diagnostics are handled in separate components but combined in one consistent update routine. This design keeps the numerical method clear while allowing the implementation to support verification features and multiple diffusion backends without changing the time-stepping logic.
 
-\section{Boundary-Condition Treatment}
+\section{Boundary-condition treatment}
 \label{sec:numimpl_boundary_conditions}
 
 In the final implementation, boundary conditions are handled in a way that keeps the diffusion backend, the time integrator, and the user interface consistent with each other. The code supports boundary conditions independently on the four sides of the rectangular domain,
@@ -448,14 +448,14 @@ From a numerical perspective, the chosen approach is primarily an implementation
 
 In summary, the final code uses a hybrid boundary-handling design. Periodic boundaries are encoded directly in the discrete Laplacian, whereas Dirichlet and Neumann conditions are enforced strongly by post-step overwrite on the two-dimensional state arrays. The result is a boundary-condition implementation that is flexible, backend-independent, and consistent with the modular structure of the solver.
 
-\section{Diffusion Backends and Default Solver Choice}
+\section{Diffusion backends and default solver choice}
 \label{sec:numimpl_backends_selection}
 
 The project supports three realizations of the discrete diffusion operator, selected through the parameter
 \[
 \texttt{p.diffusionMode} \in \{\texttt{"matrix"},\texttt{"full"},\texttt{"stencil"}\}.
 \]
-All three options represent the same second-order finite-difference Laplacian introduced in Section~\ref{sec:numimpl_spatial_laplacian}. They do not change the mathematical model, the computational grid, or the time integrator. Instead, they differ only in how the discrete operator is stored and applied in the code. This distinction is central to the project, because the main implementation question is not which diffusion model to use, but which realization of the same model is most suitable in practice.
+All three options represent the same second-order finite-difference Laplacian introduced in Sect.~\ref{sec:numimpl_spatial_laplacian}. They do not change the mathematical model, the computational grid, or the time integrator. Instead, they differ only in how the discrete operator is stored and applied in the code. This distinction is central to the project, because the main implementation question is not which diffusion model to use, but which realization of the same model is most suitable in practice.
 
 The construction of the operator is handled by \path{src/core/makeOperator.m}. This function inspects the selected diffusion mode and prepares a backend-specific operator structure before the time loop begins. As a result, the cost of building the operator is paid only once during initialization, rather than being repeated at every time step. This is an important implementation choice, since the diffusion operator depends only on the grid and the selected backend, not on the evolving concentrations themselves. Preconstructing the operator therefore avoids unnecessary repeated work during simulation.
 
@@ -495,7 +495,7 @@ From a software-engineering perspective, this backend design captures one of the
 
 In summary, the final project implements three realizations of the same discrete Laplacian: a sparse matrix backend, a dense matrix backend, and a matrix-free stencil backend. Among these, the stencil backend is chosen as the default because it avoids storing the global diffusion matrix, reduces structural memory overhead, and remains fully consistent with the same finite-difference scheme used by the other realizations. The result is a solver framework that combines numerical consistency with practical flexibility and backend-aware implementation design.
 
-\section{MATLAB Implementation Architecture and Practical Optimizations}
+\section{MATLAB implementation architecture and practical optimizations}
 \label{sec:numimpl_architecture_optimizations}
 
 Beyond the numerical method itself, an important part of the project is the way the solver is organized as a MATLAB program. The final implementation is written in MATLAB R2025b and is structured as a modular code base rather than as a single monolithic script. This design choice improves readability, simplifies testing, and makes it possible to modify one component of the program without changing the rest of the solver. In particular, parameter definition, grid generation, diffusion-operator construction, reaction evaluation, one-step time integration, plotting, output export, and testing are separated into dedicated files with clearly defined responsibilities.
@@ -548,28 +548,28 @@ From a software-engineering perspective, the final implementation combines modul
 
 In summary, the MATLAB implementation is organized around a clear division of responsibilities: parameter definition and normalization, grid construction, operator setup, model-state management, one-step evolution, output handling, and testing are all separated into dedicated components. On top of this modular architecture, the final code introduces several practical optimizations, including preconstructed operators, reproducible initialization, boundary caching, persistent plotting objects, persistent export figures, and structured output logging. These implementation choices complement the numerical method and help turn the solver into a consistent and reliable computational tool.
 
-\section{Graphical User Interface (GUI)}
+\section{Graphical user interface (GUI)}
 \label{sec:gui}
 
-\subsection{GUI Design Evolution and Final Concept}
+\subsection{GUI design evolution and final concept}
 \label{subsec:gui_evolution}
 
 The graphical user interface (GUI) of the final program was not fixed from the beginning, but was developed through a small design evolution. The main goal of the GUI was to provide a simple and practical interface for controlling the Gray--Scott simulation without changing the underlying numerical core. During the design process, different window layouts were considered in order to find a solution that was both user-friendly and technically robust in MATLAB.
 
 Although the GUI is not the numerical core of the project, its implementation was not a trivial add-on. Even for a medium-sized scientific application, GUI development requires the coordination of many interactive elements such as parameter controls, boundary-condition selection, plotting, simulation-state handling, and recording options. For this reason, the GUI design had to be refined step by step instead of being treated as a purely cosmetic wrapper around the solver.
 
-The first concept was an all-in-one interface in which the simulation controls and the graphical visualization were planned to appear in a single window. This idea was attractive because it grouped all user interactions and outputs in one place. Figure~\ref{fig:gui_mockup_allinone} shows this early mockup. However, during implementation this approach became less suitable, mainly because plotting inside an embedded axis object caused practical difficulties. In addition, combining all controls and visualization elements in one window made the interface more crowded and harder to manage.
+The first concept was an all-in-one interface in which the simulation controls and the graphical visualization were planned to appear in a single window. This idea was attractive because it grouped all user interactions and outputs in one place. Fig.~\ref{fig:gui_mockup_allinone} shows this early mockup. However, during implementation this approach became less suitable, mainly because plotting inside an embedded axis object caused practical difficulties. In addition, combining all controls and visualization elements in one window made the interface more crowded and harder to manage.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.85\textwidth]{figures/mockup-all-in-one.png}
     \caption{Early all-in-one GUI mockup combining controls and simulation visualization in a single window.}
     \label{fig:gui_mockup_allinone}
 \end{figure}
 
-For this reason, the design was revised toward a two-window concept. In this second approach, one window was dedicated to simulation control and parameter adjustment, while a separate window was used for visualization of the computed field. An early mockup of this direction is shown in Figure~\ref{fig:gui_mockup_twowindows}. This change reduced clutter, improved usability, and made the MATLAB implementation more manageable.
+For this reason, the design was revised toward a two-window concept. In this second approach, one window was dedicated to simulation control and parameter adjustment, while a separate window was used for visualization of the computed field. An early mockup of this direction is shown in Fig.~\ref{fig:gui_mockup_twowindows}. This change reduced clutter, improved usability, and made the MATLAB implementation more manageable.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.85\textwidth]{figures/mockup-two-windows.png}
     \caption{Revised GUI mockup with separated controller and visualization windows.}
@@ -578,32 +578,32 @@ For this reason, the design was revised toward a two-window concept. In this sec
 
 The final GUI follows this separated architecture. A controller window is used for parameter input and simulation commands, while a separate plot window displays the selected solution field. This final concept provides a clearer workflow for the user and avoids the technical limitations encountered in the earlier all-in-one design. At the same time, it preserves the main purpose of the GUI as a convenient front end to the same simulation engine that is also used by the non-GUI workflow.
 
-\subsection{Final GUI Structure and Main Features}
+\subsection{Final GUI structure and main features}
 \label{subsec:gui_structure}
 
 The final GUI is organized as two cooperating windows: a controller window for user interaction and a separate plot window for graphical output. This separation was chosen deliberately in order to keep the interface clear and to avoid overloading a single window with too many responsibilities. The controller is responsible for receiving user input and managing the simulation state, whereas the plot window is dedicated to visualizing the computed solution field.
 
-The controller window is shown in Figure~\ref{fig:gui_final_controller}. It combines the most important simulation controls in one place. The interface includes parameter sliders for the feed and kill rates, displayed diffusion coefficients, boundary-condition selection, and the main execution buttons for running, pausing, restarting, resetting, and recording the simulation. In addition, the user can choose which field is displayed, select a video format for export, define the recording frame rate, and monitor the current simulation state through the status display. The equations are also shown directly in the interface so that the GUI remains closely connected to the underlying mathematical model.
+The controller window is shown in Fig.~\ref{fig:gui_final_controller}. It combines the most important simulation controls in one place. The interface includes parameter sliders for the feed and kill rates, displayed diffusion coefficients, boundary-condition selection, and the main execution buttons for running, pausing, restarting, resetting, and recording the simulation. In addition, the user can choose which field is displayed, select a video format for export, define the recording frame rate, and monitor the current simulation state through the status display. The equations are also shown directly in the interface so that the GUI remains closely connected to the underlying mathematical model.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.92\textwidth]{figures/final-desing-controller.png}
     \caption{Final controller window of the Gray--Scott GUI.}
     \label{fig:gui_final_controller}
 \end{figure}
 
-The visualization itself is handled in a separate plot window, shown in Figure~\ref{fig:gui_final_plotter}. This window focuses on displaying the selected simulation field in a clean and readable form. By separating plotting from parameter control, the graphical output remains less cluttered and easier to inspect during interactive runs. This also improves the practical usability of the program, since the user can focus on simulation control in one window and on pattern development in another.
+The visualization itself is handled in a separate plot window, shown in Fig.~\ref{fig:gui_final_plotter}. This window focuses on displaying the selected simulation field in a clean and readable form. By separating plotting from parameter control, the graphical output remains less cluttered and easier to inspect during interactive runs. This also improves the practical usability of the program, since the user can focus on simulation control in one window and on pattern development in another.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.88\textwidth]{figures/final-design-plotter.png}
     \caption{Separate plot window used for visualization of the selected solution field.}
     \label{fig:gui_final_plotter}
 \end{figure}
 
-Even at a high level, the GUI is more than a simple collection of buttons and sliders. User actions such as moving a slider, choosing a preset, loading a saved model, starting or pausing a run, or enabling recording must trigger coordinated updates in several parts of the program. In particular, GUI controls, the shared model state, and the visualization components must remain synchronized during interactive use. The overall interaction logic is illustrated by the information-flow diagram in Figure~\ref{fig:gui_information_flow}. This makes clear that an important part of the programming effort was invested in the interaction logic behind the interface, not only in the visual arrangement of GUI elements.
+Even at a high level, the GUI is more than a simple collection of buttons and sliders. User actions such as moving a slider, choosing a preset, loading a saved model, starting or pausing a run, or enabling recording must trigger coordinated updates in several parts of the program. In particular, GUI controls, the shared model state, and the visualization components must remain synchronized during interactive use. The overall interaction logic is illustrated by the information-flow diagram in Fig.~\ref{fig:gui_information_flow}. This makes clear that an important part of the programming effort was invested in the interaction logic behind the interface, not only in the visual arrangement of GUI elements.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.92\textwidth]{figures/InformationFlowGUI.png}
     \caption{Information flow between the main GUI elements, the shared model state, and the visualization components.}
@@ -612,7 +612,7 @@ Even at a high level, the GUI is more than a simple collection of buttons and sl
 
 In this way, the final GUI provides an interface that is practical for interactive use while remaining closely connected to the numerical model. The two-window architecture not only reduces visual clutter, but also gives the user direct access to MATLAB's standard figure tools in the separate plot window, including the save-figure functionality. This makes the application easier to use, easier to maintain, and well suited to repeated simulation, visualization, and optional recording.
 
-\subsection{Integration with the Simulation Core}
+\subsection{Integration with the simulation core}
 \label{subsec:gui_integration}
 
 The GUI was designed as a front end to the same simulation core that is also used outside the graphical environment. In other words, the GUI does not implement a separate numerical model of its own. Instead, it provides a structured way for the user to define parameters, start or stop computations, select visualization options, and trigger output actions while relying on the existing solver and model workflow in the background. This design was important in order to avoid duplication of numerical logic and to keep the program behavior consistent between GUI and non-GUI execution.
