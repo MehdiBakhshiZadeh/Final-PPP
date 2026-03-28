@@ -24,6 +24,17 @@ The time step was solver-independent on each grid. For \(32\times32\), \(64\time
 
 The dense solver was included only up to \(128\times128\), because beyond this range its memory cost becomes impractical. Therefore, the main comparison for realistic simulations is between the sparse-matrix and stencil-based solvers.
 
+The benchmark workflow is organized in the folder
+\texttt{benchmark\_solver\_performance} inside \texttt{tests}, and the
+main benchmark script is \texttt{benchmark\_solvers.m}. Generated benchmark
+result files are written to the local \texttt{outputs} folder of this
+benchmark case.
+
+To run the benchmark from the project \texttt{tests} folder, execute:
+\begin{verbatim}
+benchmark_solvers
+\end{verbatim}
+
 \section{Compute-Only Runtime Comparison}
 
 Figure~\ref{fig:bench_compute_runtime} shows the compute-only runtime results. The dense solver is included only as a small-scale reference and is not competitive beyond the smallest grids. The practically relevant comparison is therefore between the sparse-matrix and stencil-based implementations.
@@ -186,3 +197,4 @@ Taken together, the benchmark results lead to three main conclusions. First, the
 The final recommended default solver for this project is the stencil-based solver. This recommendation is based on the overall benchmark results of the previous sections. The stencil solver is not always the fastest in absolute runtime, but it remains competitive in both compute-only and live-display execution, while using far less memory than the sparse-matrix solver. In addition, for the larger grids, its measured memory stays much closer to the predicted memory requirement. This makes the stencil implementation more predictable and more suitable for scaling to larger and more complex problems.
 
 Therefore, the stencil solver provides the best overall compromise between speed, memory efficiency, and scalability. For this reason, it was selected as the recommended default solver in the final Gray--Scott program, while the sparse-matrix solver remains a useful alternative and the dense solver is retained only as a small-scale reference implementation.
+

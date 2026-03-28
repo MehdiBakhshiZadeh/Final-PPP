@@ -62,9 +62,9 @@ From the project \texttt{tests} folder, run:
 r = test_mms_operator_convergence();
 \end{verbatim}
 
-The test prints the error values in the MATLAB command window and saves the convergence plot to:
+The test prints the error values in the MATLAB command window and saves the convergence plot in the local output folder of
 \begin{verbatim}
-figures/verification/mms_operator_convergence.png
+tests/test_case_01_mms_operator/
 \end{verbatim}
 
 \paragraph{Expected result.}
@@ -165,9 +165,9 @@ From the project \texttt{tests} folder, run:
 r = test_timestep_convergence();
 \end{verbatim}
 
-The test prints the measured successive differences and observed orders to the MATLAB command window and saves the figure
+The test prints the measured successive differences and observed orders to the MATLAB command window and saves the generated figure in the local output folder of
 \begin{verbatim}
-figures/verification/timestep_convergence.png
+tests/test_case_02_timestep_convergence/
 \end{verbatim}
 
 \paragraph{Expected result.}
@@ -673,25 +673,31 @@ The tolerances used by the comparison script are
 
 The relevant scripts are:
 \begin{verbatim}
-tests/gui_consistency/run_nongui_reference_dump.m
-tests/gui_consistency/run_gui_consistency_dump.m
-tests/gui_consistency/compare_gui_nongui.m
+run_nongui_reference_dump.m
+run_gui_consistency_dump.m
+compare_gui_nongui.m
+\end{verbatim}
+
+All three files are located in:
+\begin{verbatim}
+tests/test_case_06_gui_nongui_consistency/
 \end{verbatim}
 
 \paragraph{How to run the test case.}
-Run the workflow either from the project root or from \texttt{tests/gui\_consistency}. Make sure that the project paths are available. Then execute:
+Run the workflow either from the project root or from
+\texttt{tests/test\_case\_06\_gui\_nongui\_consistency}. Make sure that the project paths are available. Then execute:
 \begin{verbatim}
 ref = run_nongui_reference_dump();
 gui = run_gui_consistency_dump();
 T   = compare_gui_nongui(ref.refFile, gui.guiFile);
 \end{verbatim}
 
-For the documented run, the scripts saved:
+The first two helper scripts save their generated \texttt{.mat} files in the local output folder of
+\texttt{tests/test\_case\_06\_gui\_nongui\_consistency/}. The comparison script can read those files directly when their paths are passed explicitly, as shown above. If \texttt{compare\_gui\_nongui()} is called without arguments, it instead searches for comparison input files in the local \texttt{inputs/} folder.
+
+For the documented run, the workflow produced the non-GUI dump, the GUI dump, the comparison CSV file, and the comparison figure in the local output folder
 \begin{verbatim}
-results/consistency/nongui_reference_<timestamp>.mat
-results/consistency/gui_dump_<timestamp>.mat
-results/consistency/gui_consistency_table.csv
-figures/verification/gui_consistency.png
+tests/test_case_06_gui_nongui_consistency/
 \end{verbatim}
 
 \paragraph{Expected result.}
@@ -741,58 +747,94 @@ Hence, this test confirms that the GUI layer does not modify the mathematical or
 \label{sec:verification_testcase_grid_refinement}
 
 \paragraph{Aim.}
-This test case examines how the fully nonlinear Gray--Scott solution changes under spatial grid refinement. In contrast to the manufactured-solution tests, this is not a strict exact-solution verification test, because no analytical reference solution is available for the nonlinear pattern-forming problem considered here. Instead, the purpose is to check whether the computed solution approaches a fine-grid reference in a consistent and systematic way as the spatial grid is refined. This provides additional evidence that the implemented solver behaves plausibly for the actual Gray--Scott system, beyond the linearized or manufactured-solution settings used in the earlier test cases.
+This test case investigates how the numerical solution of the full nonlinear Gray--Scott system changes under spatial grid refinement. Unlike the manufactured-solution tests, this is not an exact-solution verification test, because no analytical reference solution is available for the pattern-forming nonlinear problem considered here. The goal is therefore more practical: to check whether the computed solution approaches a sufficiently fine-grid reference in a systematic way as the mesh is refined, and whether the observed behavior is consistent with the expected second-order spatial discretization used in the solver.
 
-\paragraph{Setup.}
-The test is performed for the Gray--Scott model on the periodic square domain
+\paragraph{Initial idea and first difficulty.}
+The original idea of this test was straightforward. The Gray--Scott system was solved on a sequence of grids, the finest grid was used as a numerical reference, and the coarser-grid solutions were compared against that reference in the discrete \(L^2\) norm. The time step was scaled as \(\Delta t \sim h^2\) in order to reduce the influence of the first-order explicit Euler time discretization and make the comparison mainly sensitive to spatial effects.
+
+However, the first version of the test did not give the expected result. Although the errors decreased monotonically under refinement, the observed rates remained noticeably below the ideal value \(2\). At first sight, this could suggest that the fully nonlinear Gray--Scott dynamics, especially the phase-sensitive pattern evolution, prevented a clean refinement study. A closer inspection showed that this was only part of the explanation.
+
+\paragraph{Why the first version was not fully reliable.}
+The main issue in the original version was that the initialization was not grid-independent. The standard Gray--Scott pattern-seeding setup used in the project is suitable for normal simulations, but it is not ideal for a formal refinement study. In particular, the original initialization contained two features that made the comparison across grids less clean:
+
+\begin{enumerate}
+    \item The initial square perturbation was prescribed in a fixed number of grid cells rather than in physical coordinates. As a result, its physical size changed when the grid was refined.
+    \item A random perturbation was added independently on each grid. Even with the same random seed, this does not represent the same physical perturbation sampled on different meshes.
+\end{enumerate}
+
+Therefore, the different grid levels did not correspond to exactly the same initial-value problem. For a nonlinear pattern-forming PDE such as the Gray--Scott system, even small differences in the initial condition can later produce visible phase shifts, slight pattern displacements, and morphology changes. Consequently, the discrete \(L^2\) difference between two solutions may reflect not only discretization error, but also mismatch in the underlying evolving pattern.
+
+This analysis explained why the original version produced only moderate observed rates even though the error still decreased consistently.
+
+\paragraph{Correction of the test design.}
+To make the refinement study meaningful, the test was reformulated so that all grid levels solve the same problem as closely as possible. Two changes were introduced:
+
+\begin{enumerate}
+    \item The original grid-dependent seeded pattern was replaced by a smooth Gaussian-type initial condition defined directly in physical coordinates.
+    \item The random perturbation was disabled for this test.
+\end{enumerate}
+
+With these two changes, every grid represents the same smooth initial state sampled at different resolutions. This removes the main inconsistency of the original setup and makes the subsequent comparison much more suitable for measuring refinement behavior.
+
+In addition, the final simulation time was reduced to
+\[
+T = 0.2,
+\]
+instead of using a longer pattern-development time. This makes the test less sensitive to long-time nonlinear phase drift and allows the spatial discretization error to remain the dominant effect.
+
+\paragraph{Final setup used for the reported result.}
+The corrected test was carried out for the Gray--Scott model on the periodic square domain
 \[
 \Omega = [0,1)\times[0,1)
 \]
-using the standard baseline parameter set
+with the baseline parameter set
 \[
 D_u = 2\times 10^{-5}, \qquad
 D_v = 1\times 10^{-5}, \qquad
 F = 0.03, \qquad
 k = 0.06.
 \]
-The final simulation time is
+The problem was solved on the sequence of uniform grids
 \[
-T = 1.
-\]
-
-The problem is solved on the sequence of uniform grids
-\[
-N_x=N_y \in \{64,\,128,\,256,\,512,\,1024\}.
+N_x=N_y \in \{64,\,128,\,256,\,512,\,1024,\,2048\}.
 \]
 The finest grid,
 \[
-N_x=N_y=1024,
+N_x=N_y=2048,
 \]
-is used as the numerical reference solution. For the coarser grids, the corresponding solution is compared against the finest-grid result after interpolation of the reference field onto the coarser mesh using cubic interpolation.
+was used as the numerical reference solution. The reference fields were interpolated onto the coarser grids using cubic interpolation before computing the discrete \(L^2\) differences.
 
-To reduce the influence of temporal discretization error on the refinement study, the time step is chosen proportional to
+The time step was again scaled as
 \[
-h^2.
+\Delta t \sim h^2,
 \]
-More precisely, the test uses
+with
 \[
 \Delta t = 0.01 \quad \text{for } N=64,
 \]
-and then scales \(\Delta t\) by a factor of four whenever the grid spacing is halved. This gives:
+and then reduced by a factor of four whenever the grid spacing was halved. This gives
 \[
-\Delta t \in \left\{0.01,\;0.0025,\;0.000625,\;0.00015625,\;3.90625\times 10^{-5}\right\}.
+\Delta t \in \left\{
+0.01,\;
+0.0025,\;
+0.000625,\;
+0.00015625,\;
+3.90625\times 10^{-5},\;
+9.765625\times 10^{-6}
+\right\}.
 \]
-Accordingly, the corresponding numbers of time steps are
+The corresponding numbers of time steps are
 \[
-N_t \in \{100,\;400,\;1600,\;6400,\;25600\}.
+N_t \in \{20,\;80,\;320,\;1280,\;5120,\;20480\},
 \]
+after adjusting \(\Delta t\) slightly so that \(T/\Delta t\) is an integer in each case.
 
-For each coarser grid, the discrete \(L^2\) differences between the computed solution and the interpolated finest-grid reference are measured for both species:
+For each coarse grid, the discrete \(L^2\) differences were computed as
 \[
 e_U = \|U_h - U_{\mathrm{ref}}\|_{L^2}, \qquad
-e_V = \|V_h - V_{\mathrm{ref}}\|_{L^2}.
+e_V = \|V_h - V_{\mathrm{ref}}\|_{L^2},
 \]
-Observed refinement rates \(p_U\) and \(p_V\) are then estimated from the log--log slope of error versus grid spacing.
+and the observed refinement rates \(p_U\) and \(p_V\) were estimated from the log--log slope of error versus grid spacing.
 
 \paragraph{How to run the test case.}
 From the project \texttt{tests} folder, run:
@@ -800,74 +842,260 @@ From the project \texttt{tests} folder, run:
 r = test_grayscott_grid_refinement();
 \end{verbatim}
 
-The test prints the completed grid levels, interpolates the reference solution onto the coarser grids, reports the measured \(L^2\) differences, and saves the refinement plot to:
+The test executes all grid levels, interpolates the finest-grid reference onto the coarser meshes, reports the measured \(L^2\) differences, and saves the refinement plot in the local output folder of
 \begin{verbatim}
-figures/verification/grayscott_grid_refinement.png
+tests/test_case_07_grayscott_grid_refinement/
 \end{verbatim}
 
-\paragraph{Expected result.}
-Since the finest-grid solution is used as a numerical reference, one expects the coarse-grid errors to decrease monotonically as the spatial grid is refined. If the implementation behaves consistently, the solutions on successively finer grids should approach the fine-grid reference, and the corresponding \(L^2\) differences should become smaller.
-
-For this nonlinear pattern-forming problem, however, one should not expect a perfectly clean textbook second-order rate in the same sense as in the manufactured-solution operator test. Even when the numerical method itself is second-order in space, small phase shifts in the evolving pattern can produce visible pointwise differences between two solutions that are otherwise qualitatively very similar. Therefore, in this test the main criterion is consistent error reduction under refinement, together with a clearly positive observed refinement rate. The time step is scaled as \(\Delta t\sim h^2\) specifically to suppress temporal error as much as possible, so that the measured differences are dominated mainly by spatial effects.
-
 \paragraph{Obtained result.}
-The test completed successfully, and the returned result was
+With the corrected grid-independent initialization, the test produced a much cleaner refinement trend than the original version. The returned test result was
 \[
 \texttt{pass} = 1.
 \]
-The MATLAB output reported the following completed runs:
-\[
-N=64\;(\Delta t=0.01,\;N_t=100),\quad
-N=128\;(\Delta t=0.0025,\;N_t=400),
-\]
-\[
-N=256\;(\Delta t=0.000625,\;N_t=1600),\quad
-N=512\;(\Delta t=0.00015625,\;N_t=6400),
-\]
-\[
-N=1024\;(\Delta t=3.90625\times 10^{-5},\;N_t=25600).
-\]
-The finest-grid reference was then interpolated onto the \(64\times64\), \(128\times128\), \(256\times256\), and \(512\times512\) grids using cubic interpolation.
 
-The measured \(L^2\) differences are listed in Table~\ref{tab:grayscott_grid_refinement}. In both \(U\) and \(V\), the error decreases monotonically as the grid is refined:
+The measured \(L^2\) differences are given in Table~\ref{tab:grayscott_grid_refinement}. For both \(U\) and \(V\), the error decreases monotonically over all grid levels:
 \[
-7.964\times 10^{-2} \rightarrow 3.747\times 10^{-2} \rightarrow 1.571\times 10^{-2} \rightarrow 5.010\times 10^{-3}
+4.522\times 10^{-7}
+\rightarrow
+1.133\times 10^{-7}
+\rightarrow
+2.802\times 10^{-8}
+\rightarrow
+6.674\times 10^{-9}
+\rightarrow
+1.335\times 10^{-9}
 \]
 for \(U\), and
 \[
-4.332\times 10^{-2} \rightarrow 2.186\times 10^{-2} \rightarrow 9.693\times 10^{-3} \rightarrow 3.645\times 10^{-3}
+9.872\times 10^{-8}
+\rightarrow
+2.474\times 10^{-8}
+\rightarrow
+6.120\times 10^{-9}
+\rightarrow
+1.458\times 10^{-9}
+\rightarrow
+2.915\times 10^{-10}
 \]
 for \(V\).
 
 \begin{table}[htbp]
 \centering
-\caption{Gray--Scott grid-refinement differences relative to the interpolated \(1024\times1024\) reference solution.}
+\caption{Gray--Scott grid-refinement differences relative to the interpolated \(2048\times 2048\) reference solution, using the corrected smooth grid-independent initialization.}
 \label{tab:grayscott_grid_refinement}
 \begin{tabular}{|c|c|c|c|}
 \hline
 \(N_x=N_y\) & \(h\) & \(\|e_U\|_{L^2}\) & \(\|e_V\|_{L^2}\) \\
 \hline
-64  & 0.015625   & \(7.964\times 10^{-2}\) & \(4.332\times 10^{-2}\) \\
-128 & 0.0078125  & \(3.747\times 10^{-2}\) & \(2.186\times 10^{-2}\) \\
-256 & 0.00390625 & \(1.571\times 10^{-2}\) & \(9.693\times 10^{-3}\) \\
-512 & 0.001953125 & \(5.010\times 10^{-3}\) & \(3.645\times 10^{-3}\) \\
+64   & 0.015625     & \(4.522\times 10^{-7}\) & \(9.872\times 10^{-8}\) \\
+128  & 0.0078125    & \(1.133\times 10^{-7}\) & \(2.474\times 10^{-8}\) \\
+256  & 0.00390625   & \(2.802\times 10^{-8}\) & \(6.120\times 10^{-9}\) \\
+512  & 0.001953125  & \(6.674\times 10^{-9}\) & \(1.458\times 10^{-9}\) \\
+1024 & 0.0009765625 & \(1.335\times 10^{-9}\) & \(2.915\times 10^{-10}\) \\
 \hline
 \end{tabular}
 \end{table}
 
 The observed refinement rates reported by the code are
 \[
-p_U = 1.70, \qquad p_V = 1.63.
+p_U = 2.09, \qquad p_V = 2.09.
 \]
-These values are clearly positive and indicate substantial convergence toward the finest-grid reference, but they are somewhat below the ideal value \(2\). For the nonlinear Gray--Scott problem, this is not unexpected. As the patterns evolve, small phase shifts and slight spatial displacements can develop between solutions computed on different grids. Such phase differences can increase the pointwise and \(L^2\) discrepancy even when the overall morphology is converging correctly. Therefore, the measured rates should be interpreted as consistency-oriented refinement rates for a nonlinear pattern-forming PDE rather than as exact textbook spatial orders.
 
-Figure~\ref{fig:grayscott_grid_refinement} shows the corresponding log--log refinement plot. The figure confirms the monotonic decrease of the solution differences and supports the conclusion that the solver converges consistently toward the fine-grid reference. In this sense, the test provides useful additional evidence that the full Gray--Scott implementation behaves plausibly under mesh refinement for the nonlinear problem of interest.
+These values are now very close to the theoretical value \(2\). This behavior is exactly what is expected from the second-order central-difference discretization of the Laplacian when the time step is scaled as \(\Delta t \sim h^2\). In other words, after removing the grid-dependent initialization effects that contaminated the original formulation, the test reveals the expected spatial refinement behavior much more clearly.
+
+It is important to interpret this result correctly. It demonstrates that, for a smooth grid-independent initial condition and a sufficiently controlled time-step refinement strategy, the computed solutions converge toward the fine-grid reference with a rate consistent with second-order spatial accuracy.
+
+\paragraph{Interpretation.}
+This test case is useful not only because of the final numerical result, but also because it documents an important verification lesson. The first formulation produced monotonic error reduction but only moderate rates, which initially suggested that phase-sensitive nonlinear dynamics might limit the refinement study. A more careful analysis showed that the dominant problem was actually the test design itself: the initial condition changed with the grid. Once the initialization was reformulated in a grid-independent way and the random perturbation was removed, the expected second-order behavior became visible.
+
+This progression is important for the overall verification strategy of the project. It shows that the solver was not merely producing plausible pictures; rather, the refinement behavior was examined critically, the source of the inconsistency was identified, and the test was redesigned until it measured the intended property in a technically meaningful way.
+
+Figure~\ref{fig:grayscott_grid_refinement} shows the final log--log refinement plot. The nearly straight lines and the monotonic decrease of the errors confirm that the corrected test setup provides strong additional evidence that the full Gray--Scott implementation behaves consistently under mesh refinement.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.82\textwidth]{figures/verification/grayscott_grid_refinement.png}
-\caption{Gray--Scott grid-refinement study using the \(1024\times1024\) solution as a numerical reference. The measured \(L^2\) differences in \(U\) and \(V\) decrease monotonically as the grid is refined.}
+\caption{Final Gray--Scott grid-refinement study using the \(2048\times 2048\) solution as a numerical reference and a smooth grid-independent initial condition. The measured \(L^2\) differences in \(U\) and \(V\) decrease monotonically and yield observed rates \(p_U=p_V\approx 2.09\), consistent with second-order spatial behavior.}
 \label{fig:grayscott_grid_refinement}
+\end{figure}
+
+\subsection{Test Case 8: Explicit Euler Stability Limit}
+\label{sec:verification_testcase_explicit_stability_limit}
+
+\paragraph{Aim.}
+This test case verifies that the explicit Euler time integration used in the solver exhibits the correct conditional stability behavior for the diffusion part of the model. In contrast to the convergence tests, the purpose here is not to measure accuracy, but to check whether the implemented scheme obeys the theoretically known critical time-step limit. This is an important verification step because, for explicit methods, stability is a fundamental numerical property that must be reproduced correctly by the implementation.
+
+\paragraph{Setup.}
+The test is carried out in a controlled pure-diffusion subcase of the implemented Gray--Scott solver. To remove the reaction terms, the parameters are set to
+\[
+F = 0, \qquad k = 0,
+\]
+and the second species is initialized as
+\[
+v \equiv 0.
+\]
+As a result, the reaction part vanishes identically and the test isolates the explicit Euler discretization of the diffusion operator.
+
+The computation is performed on a periodic square grid with
+\[
+N_x = N_y = 128.
+\]
+The diffusion coefficient of the first species is
+\[
+D_u = 2 \times 10^{-5},
+\]
+while \(D_v\) is irrelevant in this test because \(v\) remains zero throughout.
+
+To excite the most restrictive mode for stability, the initial condition for \(u\) is chosen as a checkerboard perturbation around the constant mean state:
+\[
+u(x,y,0) = 1 + 0.1\,(-1)^{i+j}.
+\]
+This corresponds to the highest-frequency periodic mode of the discrete five-point Laplacian on an even grid. For this mode, the explicit Euler amplification factor is known analytically as
+\[
+g = 1 - \Delta t\,D_u\,\lambda_{\max},
+\]
+where
+\[
+\lambda_{\max} = \frac{4}{h_x^2} + \frac{4}{h_y^2}.
+\]
+Therefore, the critical time step is
+\[
+\Delta t_{\mathrm{crit}} = \frac{2}{D_u\,\lambda_{\max}}.
+\]
+
+For the documented run, this gives
+\[
+\Delta t_{\mathrm{crit}} = 0.762939.
+\]
+Three cases are then tested:
+\[
+\Delta t = 0.9\,\Delta t_{\mathrm{crit}}, \qquad
+\Delta t = 1.0\,\Delta t_{\mathrm{crit}}, \qquad
+\Delta t = 1.1\,\Delta t_{\mathrm{crit}}.
+\]
+Thus, the actual time-step values used are
+\[
+\Delta t \in \{0.68664551,\;0.76293945,\;0.83923340\}.
+\]
+
+Each case is advanced for
+\[
+n_{\text{steps}} = 20
+\]
+explicit Euler steps. At every step, the discrete \(L^2\) norm of the perturbation
+\[
+u - 1
+\]
+is measured. In addition to the observed one-step amplification factor, the complete measured norm history is compared against the theoretical history
+\[
+\|e^n\| = \|e^0\|\,|g|^n.
+\]
+
+\paragraph{How to run the test case.}
+From the project \texttt{tests} folder, run:
+\begin{verbatim}
+r = test_explicit_stability_limit();
+\end{verbatim}
+
+The test prints the measured amplification factors and final norm ratios, and saves the generated figure in the local output folder of
+\begin{verbatim}
+tests/test_case_08_explicit_stability_limit/
+\end{verbatim}
+
+\paragraph{Expected result.}
+For explicit Euler applied to diffusion, the expected behavior is classical:
+
+\begin{itemize}
+    \item if \(\Delta t < \Delta t_{\mathrm{crit}}\), the perturbation should decay;
+    \item if \(\Delta t = \Delta t_{\mathrm{crit}}\), the perturbation norm should be preserved;
+    \item if \(\Delta t > \Delta t_{\mathrm{crit}}\), the perturbation should grow, indicating instability.
+\end{itemize}
+
+For the chosen checkerboard mode, the theoretical one-step amplification factors are
+\[
+|g| = 0.8,\qquad 1.0,\qquad 1.2
+\]
+for the three tested cases. Therefore, the measured one-step amplification factors should agree with these values, and the full perturbation-norm history should follow the corresponding theoretical geometric behavior.
+
+\paragraph{Obtained result.}
+The test completed successfully, and the returned result was
+\[
+\texttt{pass} = 1.
+\]
+
+The MATLAB output reported:
+\begin{verbatim}
+case 1: dt = 0.68664551 = 0.90 dtCrit, g_theory = 0.800000,
+        g_obs = 0.800000, final/initial = 0.011529,
+        histRelErr = 3.247e-14
+
+case 2: dt = 0.76293945 = 1.00 dtCrit, g_theory = 1.000000,
+        g_obs = 1.000000, final/initial = 1.000000,
+        histRelErr = 4.996e-15
+
+case 3: dt = 0.83923340 = 1.10 dtCrit, g_theory = 1.200000,
+        g_obs = 1.200000, final/initial = 38.337600,
+        histRelErr = 9.415e-13
+\end{verbatim}
+
+The results are summarized in Table~\ref{tab:explicit_stability_limit}. In the subcritical case,
+\[
+\Delta t = 0.9\,\Delta t_{\mathrm{crit}},
+\]
+the perturbation decayed strongly, with final-to-initial ratio
+\[
+0.011529.
+\]
+At the critical value,
+\[
+\Delta t = \Delta t_{\mathrm{crit}},
+\]
+the perturbation norm was preserved exactly:
+\[
+\frac{\|e^{20}\|}{\|e^0\|} = 1.
+\]
+In the supercritical case,
+\[
+\Delta t = 1.1\,\Delta t_{\mathrm{crit}},
+\]
+the perturbation grew rapidly, with final-to-initial ratio
+\[
+38.337600.
+\]
+
+Most importantly, the measured one-step amplification factors matched the theoretical values exactly in all three cases:
+\[
+g_{\mathrm{obs}} = g_{\mathrm{theory}} = \{0.8,\;1.0,\;1.2\}.
+\]
+Moreover, the maximum relative error between the complete measured norm history and the theoretical geometric history remained extremely small, with worst case
+\[
+9.415 \times 10^{-13}.
+\]
+
+\begin{table}[H]
+\centering
+\caption{Explicit Euler stability-limit test results for the diffusion subcase on the \(128\times128\) periodic grid.}
+\label{tab:explicit_stability_limit}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+Case & \(\Delta t / \Delta t_{\mathrm{crit}}\) & \(g_{\mathrm{theory}}\) & \(g_{\mathrm{obs}}\) & final/initial \\
+\hline
+stable     & 0.9 & 0.8 & 0.8 & 0.011529 \\
+critical   & 1.0 & 1.0 & 1.0 & 1.000000 \\
+unstable   & 1.1 & 1.2 & 1.2 & 38.337600 \\
+\hline
+\end{tabular}
+\end{table}
+
+Figure~\ref{fig:explicit_stability_limit} shows the normalized perturbation \(L^2\) norm as a function of Euler step. The subcritical case decays monotonically, the critical case remains constant, and the supercritical case grows exponentially. The figure therefore reproduces exactly the three theoretical stability regimes expected for the explicit Euler discretization of diffusion.
+
+Hence, this test confirms that the implementation reproduces the correct stability boundary of the explicit Euler method. It verifies not only the qualitative behavior below, at, and above the critical time step, but also the quantitative amplification factors predicted by theory.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.82\textwidth]{figures/verification/explicit_stability_limit.png}
+\caption{Explicit Euler stability-limit test for the diffusion subcase on the \(128\times128\) periodic grid. Below the critical time step the perturbation decays, at the critical value it is preserved, and above the critical value it grows, in exact agreement with the theoretical amplification factors.}
+\label{fig:explicit_stability_limit}
 \end{figure}
 
 \section{Supplementary Verification Checks}
@@ -950,9 +1178,9 @@ and the reported final \(L^2\) errors were
 \mathrm{err}_V^{L^2} = 5.974\times 10^{-4}.
 \]
 
-These errors are small for the chosen grid and time-step size. They are consistent with a correctly implemented manufactured-solution workflow. Figure~\ref{fig:mms_endtoend_errV} shows the spatial error field for \(v\) at the final time. The smooth, structured pattern is typical of discretization error and does not indicate instability or implementation failure.
+These errors are small for the chosen grid and time-step size. They are consistent with a correctly implemented manufactured-solution workflow. The generated error figure is stored in the local output folder of \texttt{tests/supplementary\_checks/}. Figure~\ref{fig:mms_endtoend_errV} shows the spatial error field for \(v\) at the final time. The smooth, structured pattern is typical of discretization error and does not indicate instability or implementation failure.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.72\textwidth]{figures/verification/mms_endtoend_errV.png}
 \caption{Spatial error field of the manufactured-solution end-to-end test for \(v\) at \(T=1\), with \(N_x=N_y=128\) and \(\Delta t=0.01\).}
@@ -1013,7 +1241,7 @@ In addition to the formal verification tests presented earlier in this chapter, 
 
 The Gray--Scott system is well known for producing a rich variety of self-organized structures depending on the feed and kill parameters. Pearson's classical study established the basic pattern-forming context of the model, while later classification work organized a broader range of visually distinct regimes using labels such as \texttt{alpha}, \texttt{epsilon}, \texttt{kappa}, and \texttt{theta} \cite{pearson1993,munafo_gray_scott_classes}. A modern tutorial-style analysis of the Gray--Scott model and its pattern behavior is also given in \cite{gandy2022}. The present test is therefore not intended to replace the formal verification evidence, but rather to complement it by showing that the final implementation produces stable and qualitatively reasonable long-time dynamics for standard Pearson-type parameter choices.
 
-\subsection{Test Case 8: Pearson-Type Pattern Sanity Check}
+\subsection{Test Case 9: Pearson-Type Pattern Sanity Check}
 \label{sec:verification_testcase_pearson}
 
 \paragraph{Aim.}
@@ -1076,9 +1304,9 @@ From the project \texttt{tests} folder, run:
 r = test_pattern_sanity_pearson();
 \end{verbatim}
 
-The test saves the generated images in
+The test saves the generated images in the local output folder of
 \begin{verbatim}
-figures/verification/pattern_sanity/
+tests/test_case_09_pearson_pattern_sanity/
 \end{verbatim}
 and, for the documented run, completed all four cases successfully. The MATLAB output reported that snapshots were saved for all four parameter sets at
 \[
