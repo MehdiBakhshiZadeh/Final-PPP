@@ -1,6 +1,6 @@
 \chapter{Theory and Mathematical Model}
 
-\section{Gray--Scott Reaction--Diffusion System}
+\section{Gray--Scott reaction--diffusion system}
 
 Reaction--diffusion systems describe processes in which chemical species both react locally and spread in space by diffusion. Even relatively simple nonlinear interactions can generate complex spatial structures such as spots, stripes, travelling fronts, and labyrinth-like patterns. For this reason, reaction--diffusion equations are widely used as model systems for studying self-organization and pattern formation in chemistry, physics, and biology \citep{gandy2022,pearson1993}.
 
@@ -10,12 +10,12 @@ In its standard form, the model uses two scalar concentration fields, denoted he
 
 The Gray--Scott model is especially suitable for the present project because it combines a compact mathematical structure with rich qualitative behaviour. Small changes in the model parameters can lead to significantly different dynamical regimes, which makes the system an effective benchmark for the study of pattern-forming partial differential equations and their numerical simulation \citep{gandy2022,pearson1993}.
 
-\section{Interpretation of the Model Terms}
+\section{Interpretation of the model terms}
 
-In the present work, the Gray--Scott model is written in the standard dimensionless form
+In the present work, the Gray--Scott model is written in the standard dimensionless form. Accordingly, the variables and parameters are treated here in nondimensional form, so explicit physical units are not attached in this report.
 \begin{align}
-\frac{\partial u}{\partial t} &= D_u \nabla^2 u - u v^2 + F(1-u), \\
-\frac{\partial v}{\partial t} &= D_v \nabla^2 v + u v^2 - (F+k)v ,
+\frac{\partial u}{\partial t} &= D_u \nabla^2 u - u v^2 + F(1-u), \label{eq:gs_u} \\
+\frac{\partial v}{\partial t} &= D_v \nabla^2 v + u v^2 - (F+k)v . \label{eq:gs_v}
 \end{align}
 where $u(\mathbf{x},t)$ and $v(\mathbf{x},t)$ denote the concentrations of the two interacting species, $D_u$ and $D_v$ are their diffusion coefficients, $F$ is the feed rate, and $k$ is the removal or decay rate of the second species \citep{gandy2022,pearson1993}.
 
@@ -27,7 +27,7 @@ The feed term $F(1-u)$ continuously drives the field $u$ toward the reference va
 
 The qualitative behaviour of the Gray--Scott model is controlled mainly by the balance between diffusion, nonlinear autocatalytic reaction, feeding, and removal. In particular, the parameters $F$ and $k$ strongly influence whether the solution approaches a nearly homogeneous state or develops persistent heterogeneous patterns. For this reason, these parameters play a central role in the analysis of the model and in the numerical experiments carried out in this project \citep{gandy2022,pearson1993}.
 
-\section{Domain, Initial Conditions, and Boundary Conditions}
+\section{Domain, initial conditions, and boundary conditions}
 
 In this work, the Gray--Scott system is considered on a two-dimensional rectangular spatial domain
 \[
@@ -41,7 +41,7 @@ For the main Gray--Scott study in this project, periodic boundary conditions are
 
 For completeness, the implementation is not restricted to periodic boundaries only. It also supports Dirichlet and Neumann boundary conditions on each side of the domain. However, these alternatives are not the central focus of the present theory chapter. The main theoretical emphasis remains on the standard periodic Gray--Scott setting, since this is the reference configuration for the principal simulations and comparisons in the project.
 
-\section{Model Parameters Relevant to This Work}
+\section{Model parameters relevant to this work}
 
 The central model parameters of the Gray--Scott system are the diffusion coefficients $D_u$ and $D_v$ together with the feed and removal parameters $F$ and $k$. Among these, $D_u$ and $D_v$ control the relative spatial spreading of the two species, while $F$ and $k$ primarily determine the local reaction balance and therefore have a particularly strong influence on the qualitative behaviour of the solution. In practice, different combinations of these parameters can lead to markedly different dynamical regimes, ranging from almost homogeneous states to persistent heterogeneous patterns \citep{gandy2022,pearson1993}.
 
