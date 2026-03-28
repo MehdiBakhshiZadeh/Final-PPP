@@ -2,11 +2,11 @@
 
 This chapter reports an internal timing study of the final program using MATLAB's built-in \texttt{tic}/\texttt{toc} functions. The measurements were obtained for the stencil-based solver on a \(256\times256\) grid with 20 warm-up steps and 500 timed steps. Two cases were considered: a run without live plotting to isolate the numerical workload, and a run with live plotting every ten steps to assess visualization overhead.
 
-\section{Function-Level Timing Results}
+\section{Function-level timing results}
 
 Table~\ref{tab:ch9_run_summary} gives the total runtime of the two representative runs. The version without plotting reflects the computational cost of the numerical core, while the version with plotting shows the additional overhead caused by live visualization.
 
-\begin{table}[H]
+\begin{table}[htbp]
     \centering
     \caption{Overall runtime summary for the internal computation-time study.}
     \label{tab:ch9_run_summary}
@@ -15,14 +15,14 @@ Table~\ref{tab:ch9_run_summary} gives the total runtime of the two representativ
         Case & Setup time [s] & Timed-loop time [s] & Total wall time [s] \\
         \midrule
         No plotting   & 0.037584 & 0.892993 & 0.930577 \\
-        With plotting & 0.037351 & 8.385918 & 8.392077 \\
+        With plotting & 0.037351 & 8.385918 & 8.423269 \\
         \bottomrule
     \end{tabular}
 \end{table}
 
 The top-level distribution of runtime over the main program stages is shown in Table~\ref{tab:ch9_function_timing}. In the no-plot case, \texttt{eulerStep} dominates the execution. In the interactive case, plotting becomes the dominant stage.
 
-\begin{table}[H]
+\begin{table}[htbp]
     \centering
     \caption{Top-level function and stage timings for the internal computation-time study.}
     \label{tab:ch9_function_timing}
@@ -47,7 +47,7 @@ The top-level distribution of runtime over the main program stages is shown in T
 
 Since \texttt{eulerStep} is the dominant numerical stage, its internal composition was also inspected. Table~\ref{tab:ch9_eulerstep_breakdown} shows that \texttt{applyDiffusion} is the largest subcomponent inside \texttt{eulerStep} in both runs.
 
-\begin{table}[H]
+\begin{table}[htbp]
     \centering
     \caption{Internal timing breakdown of \texttt{eulerStep}.}
     \label{tab:ch9_eulerstep_breakdown}
@@ -67,6 +67,6 @@ Since \texttt{eulerStep} is the dominant numerical stage, its internal compositi
     \end{tabular}
 \end{table}
 
-\section{Identification of the Computational Bottleneck}
+\section{Identification of the computational bottleneck}
 
 The internal timing results lead to a clear bottleneck statement. For the numerical core, the dominant repeated-cost function is \texttt{eulerStep}, and the largest internal contributor within it is \texttt{applyDiffusion}. When live visualization is enabled, plotting becomes the dominant program-level cost. Thus, the main computational bottleneck of the solver itself is the repeated time-stepping routine, whereas the main practical bottleneck in interactive execution is rendering.
